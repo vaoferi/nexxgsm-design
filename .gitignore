@@ -1,0 +1,6 @@
+node_modules/
+*.log
+.DS_Store
+backstop_data/
+screenshots_*/
+report_*.json
