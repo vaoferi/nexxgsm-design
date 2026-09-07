@@ -10,17 +10,14 @@ const fallback = document.getElementById("bg-fallback");
 const testCanvas = document.createElement("canvas");
 const gl2 = testCanvas.getContext("webgl2");
 const gl = gl2 ?? testCanvas.getContext("webgl");
-if (!gl) {
-  fallback.style.display = "grid";
-  throw new Error("WebGL unavailable");
-}
+if (!gl) { fallback.style.display = "grid"; throw new Error("WebGL unavailable"); }
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.6;
+renderer.toneMappingExposure = 0.78;
 app.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -30,13 +27,10 @@ camera.lookAt(0, 0.8, 0);
 
 const VERT = `
 varying vec2 vUv;
-void main() {
-  vUv = uv;
-  gl_Position = vec4(position.xy, 0.0, 1.0);
-}
+void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }
 `;
 
-// Warmer palette: oranges, ambers, gold for Indian audience
+// Warmer palette for India version
 const FRAG = `
 precision highp float;
 varying vec2 vUv;
@@ -47,6 +41,7 @@ uniform float uHighlightBoost;
 uniform float uLumaVisibilityThreshold;
 uniform float uInvertColor;
 uniform float uHalftone;
+uniform float uToneCut;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
 vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -96,20 +91,21 @@ void main() {
   float edgeFade = 1.0 - clamp(length(p) * 0.7, 0.0, 1.0);
   float intensity = pow(clamp(mask * (0.72 + edgeFade * 0.45), 0.0, 1.0), 1.05);
 
-  // Warm palette: orange, amber, gold
+  // Warm palette: oranges, ambers, golds
   float base = nA * 0.82 + ridge * 0.18;
   vec3 col = vec3(
-    0.18 + 0.55 * (0.5 + 0.5 * cos(6.28318 * (base + 0.02 + t * 0.07))),
-    0.10 + 0.45 * (0.5 + 0.5 * cos(6.28318 * (base + 0.37 + t * 0.06))),
-    0.04 + 0.35 * (0.5 + 0.5 * cos(6.28318 * (base + 0.72 + t * 0.065)))
+    0.25 + 0.75 * (0.5 + 0.5 * cos(6.28318 * (base + 0.02 + t * 0.07))),
+    0.12 + 0.55 * (0.5 + 0.5 * cos(6.28318 * (base + 0.37 + t * 0.06))),
+    0.05 + 0.35 * (0.5 + 0.5 * cos(6.28318 * (base + 0.72 + t * 0.065)))
   );
   col *= intensity;
 
   float highlight = pow(clamp((nA * 1.1 + ridge * 0.75) - 1.1, 0.0, 1.0), 2.2);
-  col = mix(col, vec3(0.4, 0.2, 0.1), highlight * vec3(0.22, 0.16, 0.1));
+  col = mix(col, vec3(0.9, 0.7, 0.3), highlight * vec3(0.22, 0.16, 0.1));
   vec3 tex = clamp(col, 0.0, 1.0);
 
   if (uInvertColor > 0.5) { tex = vec3(1.0) - tex; }
+  if (uToneCut > 0.5) { float toneLevels = 5.0; tex = floor(tex * (toneLevels - 1.0) + 0.5) / (toneLevels - 1.0); }
 
   float lum = dot(tex, vec3(0.2126, 0.7152, 0.0722));
   float lumaStart = clamp(uLumaVisibilityThreshold, 0.0, 1.0);
@@ -144,8 +140,8 @@ function createGradientRenderSource(width = 1024, height = 576) {
     uniforms: {
       uTime: { value: 0 }, uProjectionIntensity: { value: 0.5 },
       uReflectionGain: { value: 1.0 }, uHighlightBoost: { value: 1.65 },
-      uLumaVisibilityThreshold: { value: 3.0 }, uInvertColor: { value: 0 },
-      uHalftone: { value: 0 },
+      uLumaVisibilityThreshold: { value: 0.3 }, uInvertColor: { value: 0 },
+      uHalftone: { value: 0 }, uToneCut: { value: 0 },
     },
     depthTest: false, depthWrite: false,
   });
@@ -184,38 +180,10 @@ function createScreen(texture) {
 function createBloomComposer(renderer, scene, camera) {
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.15, 0.35, 0.65);
+  const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.22, 0.42, 0.72);
   composer.addPass(bloomPass);
   composer.addPass(new OutputPass());
   return { composer, bloomPass };
-}
-
-function createProjectedFloor(width, depth, material, segments = 64) {
-  const geometry = new THREE.PlaneGeometry(width, depth, segments, segments);
-  geometry.rotateX(-Math.PI / 2);
-  return new THREE.Mesh(geometry, material);
-}
-
-function createKeyboard(material) {
-  const group = new THREE.Group();
-  const baseGeo = new THREE.BoxGeometry(1.15, 0.045, 0.42);
-  const base = new THREE.Mesh(baseGeo, material);
-  base.position.y = 0.0225;
-  group.add(base);
-  const cols = 10, rows = 3;
-  const keyW = 0.09, keyH = 0.072, keyD = 0.07, gapX = 0.012, gapZ = 0.01;
-  const startX = -((cols - 1) * (keyW + gapX)) / 2;
-  const startZ = -((rows - 1) * (keyD + gapZ)) / 2;
-  const keyGeo = new THREE.BoxGeometry(keyW, keyH, keyD);
-  for (let rz = 0; rz < rows; rz++) {
-    for (let cx = 0; cx < cols; cx++) {
-      const key = new THREE.Mesh(keyGeo, material);
-      key.position.set(startX + cx * (keyW + gapX), 0.045 + keyH * 0.5 + 0.002, startZ + rz * (keyD + gapZ));
-      group.add(key);
-    }
-  }
-  group.position.set(0, 0, 1.28);
-  return group;
 }
 
 const screenGradientSource = createGradientRenderSource(1024, 576);
@@ -224,14 +192,14 @@ screenGradientSource.render(renderer, 0);
 projectionGradientSource.render(renderer, 0);
 const { mesh: screen } = createScreen(screenGradientSource.texture);
 
-const floorKeyboardMat = new THREE.MeshStandardMaterial({ color: 0x1a1410, roughness: 0.92, metalness: 0.04 });
-const floorMesh = createProjectedFloor(100, 100, floorKeyboardMat);
+const floorMat = new THREE.MeshStandardMaterial({ color: #1a1410, roughness: 0.88, metalness: 0.06 });
+const floorGeo = new THREE.PlaneGeometry(100, 100, 64, 64);
+floorGeo.rotateX(-Math.PI / 2);
+const floorMesh = new THREE.Mesh(floorGeo, floorMat);
 floorMesh.receiveShadow = true;
-const keyboard = createKeyboard(floorKeyboardMat);
-keyboard.traverse((obj) => { if (obj instanceof THREE.Mesh) { obj.receiveShadow = true; obj.castShadow = true; } });
 
 screen.castShadow = false;
-scene.add(screen, floorMesh, keyboard);
+scene.add(screen, floorMesh);
 
 const spot = new THREE.SpotLight(0xffffff, 220);
 spot.decay = 6; spot.distance = 35; spot.angle = Math.PI / 3.1; spot.penumbra = 0.58;
@@ -253,15 +221,15 @@ const { composer, bloomPass } = createBloomComposer(renderer, scene, camera);
 
 const tune = {
   projectionIntensity: 1.64, reflectionGain: 1.0, blurRadiusPx: 64,
-  highlightBoost: 1.65, lumaVisibilityThreshold: 0.12, invertColor: false, halftone: true,
+  highlightBoost: 1.65, lumaVisibilityThreshold: 0.12, invertColor: false, halftone: true, toneCut: false,
 };
 
 function syncProjectionFxFromTune() {
   const blend = Math.max(0, tune.projectionIntensity) * Math.max(0, tune.reflectionGain);
   spot.intensity = 220 * blend;
-  floorKeyboardMat.envMapIntensity = 0.35 * Math.max(0.1, tune.reflectionGain);
+  floorMat.envMapIntensity = 0.35 * Math.max(0.1, tune.reflectionGain);
   bloomPass.radius = THREE.MathUtils.clamp(tune.blurRadiusPx / 128, 0, 1);
-  bloomPass.strength = 0.15 * Math.max(0.2, tune.highlightBoost);
+  bloomPass.strength = 0.22 * Math.max(0.2, tune.highlightBoost);
   bloomPass.threshold = THREE.MathUtils.clamp(tune.lumaVisibilityThreshold, 0, 1);
   projectionGradientSource.render(renderer, performance.now() * 0.001);
 }
@@ -290,7 +258,7 @@ window.addEventListener("beforeunload", () => {
   if (rafId !== null) cancelAnimationFrame(rafId);
   screenGradientSource.dispose();
   projectionGradientSource.dispose();
-  floorKeyboardMat.dispose();
+  floorMat.dispose();
   floorMesh.geometry.dispose();
   renderer.dispose();
 });
