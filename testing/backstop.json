@@ -1,0 +1,73 @@
+{
+  "id": "nexxgsm_design_test",
+  "viewports": [
+    { "label": "mobile-sm", "width": 320, "height": 568 },
+    { "label": "mobile-md", "width": 375, "height": 667 },
+    { "label": "mobile-lg", "width": 414, "height": 896 },
+    { "label": "tablet-sm", "width": 600, "height": 800 },
+    { "label": "tablet-md", "width": 768, "height": 1024 },
+    { "label": "tablet-lg", "width": 1024, "height": 1366 },
+    { "label": "laptop-sm", "width": 1280, "height": 800 },
+    { "label": "laptop-md", "width": 1366, "height": 768 },
+    { "label": "laptop-lg", "width": 1440, "height": 900 },
+    { "label": "desktop-sm", "width": 1536, "height": 864 },
+    { "label": "desktop-md", "width": 1920, "height": 1080 },
+    { "label": "desktop-lg", "width": 2560, "height": 1440 }
+  ],
+  "scenarios": [
+    {
+      "label": "en-US Homepage",
+      "url": "file://../versions/en-US/index.html",
+      "referenceUrl": "",
+      "readyEvent": "",
+      "readySelector": "",
+      "delay": 1000,
+      "hideSelectors": [],
+      "removeSelectors": [],
+      "hoverSelector": "",
+      "clickSelector": "",
+      "postInteractionWait": 0,
+      "selectors": ["body"],
+      "selectorExpansion": true,
+      "expect": 0,
+      "misMatchThreshold": 0.1,
+      "requireSameDimensions": true
+    },
+    {
+      "label": "en-IN Homepage",
+      "url": "file://../versions/en-IN/index.html",
+      "referenceUrl": "",
+      "readyEvent": "",
+      "readySelector": "",
+      "delay": 1000,
+      "hideSelectors": [],
+      "removeSelectors": [],
+      "hoverSelector": "",
+      "clickSelector": "",
+      "postInteractionWait": 0,
+      "selectors": ["body"],
+      "selectorExpansion": true,
+      "expect": 0,
+      "misMatchThreshold": 0.1,
+      "requireSameDimensions": true
+    }
+  ],
+  "paths": {
+    "bitmaps_reference": "backstop_data/bitmaps_reference",
+    "bitmaps_test": "backstop_data/bitmaps_test",
+    "engine_scripts": "backstop_data/engine_scripts",
+    "html_report": "backstop_data/html_report",
+    "ci_report": "backstop_data/ci_report"
+  },
+  "engine": "playwright",
+  "engineOptions": {
+    "browser": "chromium",
+    "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+  },
+  "report": ["browser"],
+  "debug": false,
+  "debugWindow": false,
+  "asyncCaptureLimit": 5,
+  "asyncCompareLimit": 50,
+  "debug": false
+}
