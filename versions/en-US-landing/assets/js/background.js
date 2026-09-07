@@ -3,6 +3,7 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 
 const app = document.getElementById("bg-three");
 const fallback = document.getElementById("bg-fallback");
@@ -14,10 +15,10 @@ if (!gl) { fallback.style.display = "grid"; throw new Error("WebGL unavailable")
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth * 1.5, window.innerHeight * 1.5);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.78;
+renderer.toneMappingExposure = 0.65;
 app.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -25,6 +26,7 @@ const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerH
 camera.position.set(0, 1.2, 5.5);
 camera.lookAt(0, 0.8, 0);
 
+// ... keep existing shaders VERT and FRAG ...
 const VERT = `
 varying vec2 vUv;
 void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }
@@ -128,6 +130,26 @@ void main() {
 }
 `;
 
+// Overlay shader for darkening bottom portion
+const OVERLAY_VERT = `
+varying vec2 vUv;
+void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }
+`;
+
+const OVERLAY_FRAG = `
+precision highp float;
+varying vec2 vUv;
+uniform float uStrength;
+uniform float uYStart;
+
+void main() {
+  // Gradient from uYStart downward: 0 -> uStrength
+  float gradient = smoothstep(uYStart, 1.0, vUv.y);
+  vec3 darkColor = vec3(0.04, 0.04, 0.05);
+  gl_FragColor = vec4(darkColor, gradient * uStrength);
+}
+`;
+
 function createGradientRenderSource(width = 1024, height = 576) {
   const w = Math.max(2, Math.floor(width));
   const h = Math.max(2, Math.floor(height));
@@ -178,9 +200,25 @@ function createScreen(texture) {
 function createBloomComposer(renderer, scene, camera) {
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.22, 0.42, 0.72);
+  const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.18, 0.38, 0.68);
   composer.addPass(bloomPass);
   composer.addPass(new OutputPass());
+
+  // Add darkening overlay pass
+  const overlayMaterial = new THREE.ShaderMaterial({
+    vertexShader: OVERLAY_VERT,
+    fragmentShader: OVERLAY_FRAG,
+    uniforms: {
+      uStrength: { value: 0.75 },
+      uYStart: { value: 0.3 },
+    },
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+  });
+  const overlayPass = new ShaderPass(overlayMaterial);
+  composer.addPass(overlayPass);
+
   return { composer, bloomPass };
 }
 
@@ -215,7 +253,7 @@ const hemiLight = new THREE.HemisphereLight(0xffffff, 0x060608, 0.04);
 hemiLight.position.set(0, 10, 0);
 scene.add(hemiLight);
 
-const { composer, bloomPass } = createBloomComposer(renderer, scene, camera);
+const { composer } = createBloomComposer(renderer, scene, camera);
 
 const tune = {
   projectionIntensity: 1.64, reflectionGain: 1.0, blurRadiusPx: 64,
@@ -226,9 +264,6 @@ function syncProjectionFxFromTune() {
   const blend = Math.max(0, tune.projectionIntensity) * Math.max(0, tune.reflectionGain);
   spot.intensity = 220 * blend;
   floorMat.envMapIntensity = 0.35 * Math.max(0.1, tune.reflectionGain);
-  bloomPass.radius = THREE.MathUtils.clamp(tune.blurRadiusPx / 128, 0, 1);
-  bloomPass.strength = 0.22 * Math.max(0.2, tune.highlightBoost);
-  bloomPass.threshold = THREE.MathUtils.clamp(tune.lumaVisibilityThreshold, 0, 1);
   projectionGradientSource.render(renderer, performance.now() * 0.001);
 }
 
@@ -243,8 +278,9 @@ function animate() {
 animate();
 
 function onResize() {
-  const width = window.innerWidth, height = window.innerHeight;
-  camera.aspect = width / height;
+  const width = window.innerWidth * 1.5;
+  const height = window.innerHeight * 1.5;
+  camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
