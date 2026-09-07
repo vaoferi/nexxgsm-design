@@ -128,54 +128,130 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
   margin-bottom: 30px;
 }
 
+/* Eight-shape figures: 8-f-c-8 as shapes, NO TEXT */
 .eight-shape {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 24px;
   margin: 0 auto;
-  max-width: 500px;
+  max-width: 600px;
 }
 
-.eight-char {
+/* 8 — two connected rings */
+.figure-8 {
   position: relative;
-  width: 100px;
-  height: 160px;
-  display: grid;
-  place-items: center;
+  width: 120px;
+  height: 200px;
   flex-shrink: 0;
 }
 
-.eight-char::before,
-.eight-char::after {
+.figure-8::before,
+.figure-8::after {
   content: '';
   position: absolute;
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   background: conic-gradient(var(--accent), var(--accent-2), var(--accent));
-  mask-image: linear-gradient(transparent 25%, black 35%);
-  -webkit-mask-image: linear-gradient(transparent 25%, black 35%);
+  mask-image: linear-gradient(transparent 30%, black 40%);
+  -webkit-mask-image: linear-gradient(transparent 30%, black 40%);
 }
 
-.eight-char::before {
+.figure-8::before {
   top: 0;
   transform: scaleY(-1);
   animation: eightPulse 4s ease-in-out infinite;
 }
 
-.eight-char::after {
+.figure-8::after {
   bottom: 0;
   animation: eightPulse 4s ease-in-out infinite reverse;
 }
 
-.eight-char span {
+/* f — vertical stem with horizontal serifs */
+.figure-f {
   position: relative;
-  z-index: 2;
-  font-family: var(--font-display);
-  font-size: 28px;
-  color: var(--text);
-  text-shadow: 0 0 15px rgba(255, 107, 53, 0.6);
+  width: 80px;
+  height: 200px;
+  flex-shrink: 0;
+}
+
+.figure-f::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  width: 20px;
+  height: 160px;
+  background: linear-gradient(var(--accent), var(--accent-2));
+  border-radius: 4px;
+}
+
+.figure-f::after {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  width: 50px;
+  height: 20px;
+  background: linear-gradient(var(--accent), var(--accent-2));
+  border-radius: 4px;
+  box-shadow: 0 50px 0 var(--accent);
+  animation: eightPulse 4s ease-in-out infinite;
+}
+
+/* c — crescent / open arc */
+.figure-c {
+  position: relative;
+  width: 100px;
+  height: 200px;
+  flex-shrink: 0;
+}
+
+.figure-c::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  width: 80px;
+  height: 180px;
+  border-radius: 50%;
+  background: conic-gradient(from 135deg, var(--accent), transparent 50%);
+  mask-image: linear-gradient(transparent 20%, black 35%);
+  -webkit-mask-image: linear-gradient(transparent 20%, black 35%);
+  animation: eightPulse 4s ease-in-out infinite;
+}
+
+/* Second 8 — mirrored for symmetry */
+.figure-8-mirror {
+  position: relative;
+  width: 120px;
+  height: 200px;
+  flex-shrink: 0;
+}
+
+.figure-8-mirror::before,
+.figure-8-mirror::after {
+  content: '';
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent), var(--accent-2), var(--accent));
+  mask-image: linear-gradient(transparent 30%, black 40%);
+  -webkit-mask-image: linear-gradient(transparent 30%, black 40%);
+}
+
+.figure-8-mirror::before {
+  top: 0;
+  transform: scaleY(-1);
+  animation: eightPulse 4s ease-in-out infinite reverse;
+}
+
+.figure-8-mirror::after {
+  bottom: 0;
+  animation: eightPulse 4s ease-in-out infinite;
 }
 
 @keyframes eightPulse {
