@@ -2,12 +2,12 @@
 :root {
   --bg: #0e0e12;
   --text: #f0f0f5;
-  --text-2: #b0b0bb;
-  --mute: #74747c;
+  --text-2: #c0c0cc;
+  --mute: #9a9aa8;
   --card: rgba(255, 255, 255, 0.04);
   --card-border: rgba(255, 255, 255, 0.08);
-  --accent: #1a8aff;
-  --accent-2: #2cb7b3;
+  --accent: #1e6ecc;
+  --accent-2: #2d8a85;
   --font: "Inter Tight", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: "Archivo Black", sans-serif;
   --font-serif: "Instrument Serif", serif;
@@ -275,7 +275,7 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 .title {
   font-family: var(--font-display);
   font-size: clamp(48px, 9vw, 120px);
-  line-height: 0.9;
+  line-height: 1.4;
   letter-spacing: -0.03em;
   margin: 0 0 30px;
 }
@@ -304,8 +304,9 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   border-radius: 999px; color: white; font-weight: 600;
   font-size: 16px; transition: all 0.2s;
+  box-shadow: none;
 }
-.btn-buy:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,138,255,0.3); }
+.btn-buy:hover { transform: translateY(-2px); }
 .buy-label { font-family: var(--font-display); }
 .buy-price { opacity: 0.8; font-weight: 500; }
 
@@ -380,10 +381,10 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 
 .btn-tg {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 14px 28px; background: #0088cc; color: white;
+  padding: 14px 28px; background: #0066aa; color: white;
   border-radius: 999px; font-weight: 600; font-size: 16px; transition: all 0.2s;
 }
-.btn-tg:hover { background: #0077b3; transform: translateY(-2px); }
+.btn-tg:hover { background: #005588; transform: translateY(-2px); }
 .btn-tg svg { width: 18px; height: 18px; }
 
 /* FAQ */
