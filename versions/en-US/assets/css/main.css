@@ -337,18 +337,78 @@ section {
   .btn {
     width: 100%;
   }
+
+  .data-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 @media (max-width: 480px) {
+  body {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .container {
+    padding: 0 0.75rem;
+  }
+
+  .brand {
+    font-size: 1.2rem;
+  }
+
+  .nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .nav a {
+    font-size: 0.8rem;
+  }
+
   .article h1 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    word-wrap: break-word;
   }
 
   .article h2 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
 
   .lede {
-    font-size: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .callout {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .data-table {
+    font-size: 0.8rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.5rem 0.6rem;
+  }
+
+  .toc {
+    padding: 1rem;
+  }
+
+  .toc li {
+    font-size: 0.9rem;
+  }
+
+  .cta-card {
+    padding: 1.25rem;
+  }
+
+  .cta-card h3 {
+    font-size: 1.2rem;
   }
 }
