@@ -67,3 +67,15 @@ Serve `versions/` and open the landing (the importmap resolves `three` from CDN)
 cd versions && python3 -m http.server 8080
 # → http://localhost:8080/en-US-landing/
 ```
+
+## Production (remote NAS)
+
+The canonical landing runs as a Docker container on the Synology NAS (DS720+, host `NAS`), served by `nginx:1.27-alpine` on **port 18080** and published to the internet through the outer Keenetic (`nlm.help`, Peak KN-2710) port forward:
+
+> **http://nlmhelp.keenetic.link:18080/**
+
+- **Content source of truth:** the NAS folder `/volume1/homes/vaoferi/Work/8fc8/nexxgsm-design/versions/en-US-landing/` — the same folder mounted on this workstation as `/Volumes/Work/8fc8`. Editing files here **is** the deploy: nginx bind-mounts the folder read-only, no rebuild or copy step.
+- **Container:** `nexxgsm-landing` (`docker run -d --name nexxgsm-landing --restart unless-stopped -p 18080:80 -v <folder>:/usr/share/nginx/html:ro nginx:1.27-alpine`), managed via SSH (`vaoferi@176.97.56.70 -p 2222`, docker needs `sudo` on Synology).
+- **Router forward:** outer Keenetic RCI `ip static`: `GigabitEthernet1 tcp 18080 → MAC 90:09:d0:06:1c:92` (NAS), comment `nexxgsm-landing`; config saved (`system configuration save`). Public IP `176.97.56.70` via DDNS name `nlmhelp.keenetic.link`.
+- **Port convention:** `180xx` = public static sites on this NAS. Taken: 18080 (this site), 18085, 18090, 18091. **Do not reuse; pick the next free 180xx** for future language copies.
+- **Pre-deploy check:** changes are visible at the public URL immediately after saving the file — verify HTTP 200 + spot-check content, not just the local preview.

@@ -26,6 +26,16 @@ body {
   min-height: 100vh;
 }
 
+/* Браузерні поверхні під світ свій design-системи, не дефолти */
+::selection { background: rgba(90, 159, 240, 0.35); color: var(--text); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .char-8::before, .char-8::after, .char-8-mirror::before, .char-8-mirror::after,
+  .char-f::before, .char-f::after, .char-c::before { animation: none; }
+  .btn-buy, .btn-telegram, .btn-paypal, .btn-tg, .clay-card, .nav-pill { transition: none; }
+}
+
 a { color: inherit; text-decoration: none; }
 button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 
@@ -203,7 +213,7 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 13px; color: var(--mute); font-weight: 500;
 }
-.hero-models .ph-fill { color: var(--accent); font-size: 15px; }
+.hero-models .models-icon { width: 15px; height: 15px; color: var(--accent); flex-shrink: 0; }
 .hero-models .paren { color: var(--mute); font-weight: 400; }
 
 .hero-cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
@@ -332,6 +342,14 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 .guide-body strong { color: var(--text); font-weight: 600; }
 .guide-body a { color: var(--accent); font-weight: 600; }
 .guide-body a:hover { text-decoration: underline; }
+
+/* Статус оплати: inline під кнопками, роль=status для скрін-рідерів */
+.pay-note {
+  margin: 16px auto 0; max-width: 40ch;
+  color: var(--text-2); font-size: 14px; line-height: 1.6;
+  padding: 10px 16px; border: 1px solid var(--card-border); border-radius: 12px;
+  background: rgba(90, 159, 240, 0.08);
+}
 
 /* FOOTER */
 .site-footer {
