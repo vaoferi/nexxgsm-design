@@ -81,19 +81,28 @@ void main() {
   float intensity = pow(clamp(mask * (0.72 + edgeFade * 0.45), 0.0, 1.0), 1.05);
 
   float base = nA * 0.82 + ridge * 0.18;
+  // ВАЖЛИВО: усі три канали мають іти з ОДНАКОВОЮ швидкістю часу (0.065).
+  // Раніше було 0.07/0.06/0.065 — фази повільно розходились і разом на ~200с
+  // (~6-7 реальних хвилин) всі канали одночасно провалювались у дно кола кольору:
+  // фон «зникав» до ~28% яскравості, потім повертався. З однаковою швидкістю
+  // взаємні фази сталі, сумарна яскравість коливається лише ~7% — це справжній цикл.
+  float tHue = t * 0.065;
   vec3 col = vec3(
-    0.18 + 0.86 * (0.5 + 0.5 * cos(6.28318 * (base + 0.02 + t * 0.07))),
-    0.14 + 0.9  * (0.5 + 0.5 * cos(6.28318 * (base + 0.37 + t * 0.06))),
-    0.2  + 0.9  * (0.5 + 0.5 * cos(6.28318 * (base + 0.72 + t * 0.065)))
+    0.18 + 0.86 * (0.5 + 0.5 * cos(6.28318 * (base + 0.02 + tHue))),
+    0.14 + 0.9  * (0.5 + 0.5 * cos(6.28318 * (base + 0.37 + tHue))),
+    0.2  + 0.9  * (0.5 + 0.5 * cos(6.28318 * (base + 0.72 + tHue)))
   );
-  col *= intensity * 0.5; // колишній uProjectionIntensity 0.5 — та сама яскравість
+  // Яскравість: 0.5 → 0.36 (користувач просив темніший фон).
+  // Це ГОЛОВНА ручка яскравості візерунка; темна база (0.04) і градієнт низу нижче — окремі речі.
+  col *= intensity * 0.36;
 
   float highlight = pow(clamp((nA * 1.1 + ridge * 0.75) - 1.1, 0.0, 1.0), 2.2);
   col = mix(col, vec3(1.0, 0.96, 0.92), highlight * 0.18);
   vec3 tex = clamp(col, 0.0, 1.0);
 
   // Темна база під градієнтом + затемнення низу (читабельність CTA)
-  tex = mix(vec3(0.04, 0.04, 0.05), tex, clamp(intensity * 1.4, 0.0, 1.0));
+  // mix-фактор 1.4 → 1.05: патерн сильніше притискається до темної бази (загальне затемнення).
+  tex = mix(vec3(0.04, 0.04, 0.05), tex, clamp(intensity * 1.05, 0.0, 1.0));
   float vgrad = smoothstep(0.3, 1.0, uv.y);
   tex = mix(tex, vec3(0.04, 0.04, 0.05), vgrad * 0.75);
 
@@ -126,6 +135,11 @@ scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+// Сповільнення анімації фону: єдиний множник часу, що йде в шейдер (uTime).
+// 0.5 = вдвічі повільніше ВСЕ (потік, цикл кольорів) — саме так, бо окремі константи
+// шейдера (0.19/0.13/0.07...) узгоджені між собою; змінювати їх поштучно не можна.
+const TIME_SCALE = 0.5;
+
 function renderFrame(tSec) {
   material.uniforms.uTime.value = tSec;
   renderer.render(scene, camera);
@@ -137,7 +151,7 @@ if (!reducedMotion) {
   let rafId = null;
   function animate() {
     rafId = requestAnimationFrame(animate);
-    renderFrame(performance.now() * 0.001);
+    renderFrame(performance.now() * 0.001 * TIME_SCALE);
   }
   animate();
 
@@ -151,5 +165,5 @@ if (!reducedMotion) {
 window.addEventListener("resize", () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderFrame(reducedMotion ? 0 : performance.now() * 0.001);
+  renderFrame(reducedMotion ? 0 : performance.now() * 0.001 * TIME_SCALE);
 });
