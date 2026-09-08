@@ -19,6 +19,81 @@
        Іконка замінена інлайн SVG у стилі решти іконок сторінки. -->
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%230e4a8a'/%3E%3Cpath d='M4 12h6m4 0h6M12 4v6m0 4v6' stroke='white' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='12' r='2' fill='white'/%3E%3C/svg%3E">
+  <!-- FAQPage schema: відповідає видимим 8 гайдам-акордеонам (текст конденсований з перших двох абзаців).
+       Синхронізувати вручну при зміні питань/першої відповіді гайда. -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "name": "Dell BIOS Password Guides",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Forgot your Dell BIOS password — what actually works?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "On most modern Dell laptops, pulling the CMOS battery does not clear a System or Admin BIOS password. Before anything else, identify exactly which prompt you are seeing and carefully write down the full System Number shown on screen; for supported codes, a model-dependent recovery option may be available. This guide covers Dell System and Admin prompts. HDD/SSD locks, BitLocker, and Windows sign-in need different recovery paths."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "System Number vs. Service Tag — which one do you send?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Service Tag is Dell's identifier for support, warranty, drivers, and ownership records. It is usually printed on the chassis and may also appear in BIOS information or Dell utilities. The System Number on a BIOS password screen is the complete, device-specific value displayed by that exact screen. On some systems it may include familiar Service Tag characters plus an extra suffix — but it cannot be reconstructed from memory, and the sticker alone is not enough. Copy the full value directly from the screen. The suffix after the separator helps identify the password-screen family, but it is not a device identifier and not a password. The characters before it matter too. Don't add spaces, skip characters, swap similar letters and digits, or send only the last group."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Dell Security Manager keeps asking for a password?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "If “This computer system is protected by a password authentication system” appears before Windows starts, identify the password type first. From a “Dell Security Manager” heading alone you cannot tell what is locked: startup, BIOS settings, or the storage drive. No universal factory password exists for all Dell laptops. A System or Admin password may have been set by you, a previous owner, or an IT department. “Admin” is the password type — not a hint to type “admin”. If you remember it, use it; if not, don't brute-force random lists."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Admin, System &amp; HDD passwords — how do they differ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A Dell admin password requested by F2 BIOS Setup is not the Windows administrator password. Admin/Setup protects firmware settings, System can block startup, and a drive password is a separate case entirely. Checked before the operating system loads and can stop the boot. It is not a Windows password, PIN, or Microsoft account."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does the 8FC8 suffix in your code mean?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "If the code on your Dell password screen ends in “-8FC8”, then 8FC8 is just a suffix. It is not the full code, not a password, and not proof that a recovery method will work. The code looks like XXXXXXX-8FC8. The four characters after the dash are the suffix; the characters before the dash are also required for a compatibility check. “8FC8” alone is not enough."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "BIOS password or Windows password — which one is blocking you?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "“Reset my Dell laptop password” can mean several unrelated problems. The right path depends on when the prompt appears and what exactly it says. A System password is checked at power-on and can stop the machine before Windows. An Admin/Setup password protects changes inside F2 Setup even though Windows may still load. If one of these screens shows an error or system code, copy it exactly, including the suffix after the dash — but never publish the full code in comments or forums."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "BIOS Recovery vs. password reset — not the same thing",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "“Dell BIOS recovery” and “Dell BIOS password reset” sound similar but do not replace each other. One process repairs firmware; the other is about authentication. BIOS Recovery attempts to restore correct firmware after corruption or a failed update, using disk or USB methods on supported models. It is not a password-removal tool, and the process is not available or successful for every model and fault."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there a default or master Dell BIOS password?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There is no universal default Dell BIOS password. Admin and System passwords are set per device — there is no shared word for the whole lineup. “Not Set” means no password is assigned, not that there is a password to type in. Dell does not publish a factory or universal master password that unlocks any Dell computer. System, Admin/Setup, and Hard Drive passwords protect different things and may have been set by the owner, a previous owner, an employer, or corporate IT policy. A word from an internet list proves nothing about your device, and repeated guessing can cause delays or lockout."
+      }
+    }
+  ]
+}
+  </script>
 </head>
 <body>
   <div id="bg-three"></div>
@@ -180,7 +255,7 @@
 
       <details class="clay-card guide">
         <summary>Forgot your Dell BIOS password — what actually works?</summary>
-        <div class="guide-body">
+        <div class="guide-wrap"><div class="guide-body">
           <p>On most modern Dell laptops, pulling the CMOS battery does <strong>not</strong> clear a System or Admin BIOS password. Before anything else, identify exactly which prompt you are seeing and carefully write down the full System Number shown on screen; for supported codes, a model-dependent recovery option may be available.</p>
           <p>This guide covers <strong>Dell System and Admin prompts</strong>. HDD/SSD locks, BitLocker, and Windows sign-in need different recovery paths.</p>
           <h3>Identify the password screen</h3>
@@ -203,12 +278,12 @@
           <h3>Can recovery be impossible?</h3>
           <p>Yes. A suffix alone guarantees nothing. <strong>Master Password Lockout</strong> can disable code-based recovery, and HDD/SSD passwords plus some NVMe cases require a separate check.</p>
           <p><a href="https://nexxgsm.com/blog/dell-bios-forgotten-password?lang=en-US" target="_blank" rel="noopener">Read the original guide →</a></p>
-        </div>
+        </div></div>
       </details>
 
       <details class="clay-card guide">
         <summary>System Number vs. Service Tag — which one do you send?</summary>
-        <div class="guide-body">
+        <div class="guide-wrap"><div class="guide-body">
           <p><strong>Service Tag</strong> is Dell's identifier for support, warranty, drivers, and ownership records. It is usually printed on the chassis and may also appear in BIOS information or Dell utilities. The <strong>System Number on a BIOS password screen</strong> is the complete, device-specific value displayed by that exact screen. On some systems it may include familiar Service Tag characters plus an extra suffix — but it cannot be reconstructed from memory, and the sticker alone is not enough. Copy the full value directly from the screen.</p>
           <h3>Why the full on-screen value matters</h3>
           <p>The suffix after the separator helps identify the password-screen family, but it is not a device identifier and not a password. The characters before it matter too. Don't add spaces, skip characters, swap similar letters and digits, or send only the last group.</p>
@@ -227,12 +302,12 @@
             <li>Assuming two Dells of the same model share the same prompt and recovery result.</li>
           </ul>
           <p><a href="https://nexxgsm.com/blog/dell-system-number-vs-service-tag?lang=en-US" target="_blank" rel="noopener">Read the original guide →</a></p>
-        </div>
+        </div></div>
       </details>
 
       <details class="clay-card guide">
         <summary>Dell Security Manager keeps asking for a password?</summary>
-        <div class="guide-body">
+        <div class="guide-wrap"><div class="guide-body">
           <p>If “This computer system is protected by a password authentication system” appears before Windows starts, identify the password type first. From a “Dell Security Manager” heading alone you cannot tell what is locked: startup, BIOS settings, or the storage drive.</p>
           <h3>Match your screen wording</h3>
           <ul>
@@ -249,12 +324,12 @@
           <h3>Before ordering a recovery password</h3>
           <p>If the laptop was recently bought second-hand, ask the seller to remove the password. For a managed work device, contact your IT administrator. A known current password can be changed in the BIOS itself. Removing the CMOS battery or reinstalling Windows are not universal fixes, and Master Password Lockout can disable code-based recovery entirely.</p>
           <p><a href="https://nexxgsm.com/blog/dell-security-manager-password?lang=en-US" target="_blank" rel="noopener">Read the original guide →</a></p>
-        </div>
+        </div></div>
       </details>
 
       <details class="clay-card guide">
         <summary>Admin, System &amp; HDD passwords — how do they differ?</summary>
-        <div class="guide-body">
+        <div class="guide-wrap"><div class="guide-body">
           <p>A Dell admin password requested by F2 BIOS Setup is <strong>not</strong> the Windows administrator password. Admin/Setup protects firmware settings, System can block startup, and a drive password is a separate case entirely.</p>
           <h3>System password</h3>
           <p>Checked before the operating system loads and can stop the boot. It is not a Windows password, PIN, or Microsoft account.</p>
@@ -267,12 +342,12 @@
           <h3>Windows and BitLocker are separate systems</h3>
           <p>A Windows password or PIN controls sign-in. BitLocker encrypts the Windows volume and asks for a 48-digit recovery key. Neither is a Dell System, Admin, or HDD/SSD password.</p>
           <p><a href="https://nexxgsm.com/blog/dell-bios-password-types?lang=en-US" target="_blank" rel="noopener">Read the original guide →</a></p>
-        </div>
+        </div></div>
       </details>
 
       <details class="clay-card guide">
         <summary>What does the 8FC8 suffix in your code mean?</summary>
-        <div class="guide-body">
+        <div class="guide-wrap"><div class="guide-body">
           <p>If the code on your Dell password screen ends in “-8FC8”, then 8FC8 is just a suffix. It is not the full code, not a password, and not proof that a recovery method will work.</p>
           <h3>Copy the full code</h3>
           <p>The code looks like <strong>XXXXXXX-8FC8</strong>. The four characters after the dash are the suffix; the characters before the dash are also required for a compatibility check. “8FC8” alone is not enough.</p>
@@ -289,12 +364,12 @@
           <h3>When recovery may be unavailable</h3>
           <p>If Master Password Lockout was enabled before the password was lost, code-based recovery is disabled. The remaining repair option may be replacing the motherboard or the locked drive. HDD/SSD passwords are handled separately, and Dell creates no release codes for NVMe SSDs. The 8FC8 suffix does not change these limits.</p>
           <p><a href="https://nexxgsm.com/blog/dell-8fc8-bios-password-code?lang=en-US" target="_blank" rel="noopener">Read the original guide →</a></p>
-        </div>
+        </div></div>
       </details>
 
       <details class="clay-card guide">
         <summary>BIOS password or Windows password — which one is blocking you?</summary>
-        <div class="guide-body">
+        <div class="guide-wrap"><div class="guide-body">
           <p>“Reset my Dell laptop password” can mean several unrelated problems. The right path depends on when the prompt appears and what exactly it says.</p>
           <h3>Quick triage</h3>
           <ul>
@@ -309,12 +384,12 @@
           <h3>When BIOS is NOT involved</h3>
           <p>A forgotten Windows PIN needs no BIOS unlock. A Microsoft account password is recovered through Microsoft. BitLocker needs its recovery key, not a Dell BIOS code. An HDD or SSD password affects data access and is verified separately.</p>
           <p><a href="https://nexxgsm.com/blog/dell-laptop-password-bios-vs-windows?lang=en-US" target="_blank" rel="noopener">Read the original guide →</a></p>
-        </div>
+        </div></div>
       </details>
 
       <details class="clay-card guide">
         <summary>BIOS Recovery vs. password reset — not the same thing</summary>
-        <div class="guide-body">
+        <div class="guide-wrap"><div class="guide-body">
           <p>“Dell BIOS recovery” and “Dell BIOS password reset” sound similar but do not replace each other. One process repairs firmware; the other is about authentication.</p>
           <h3>Quick comparison</h3>
           <ul>
@@ -336,12 +411,12 @@
             <li>If the computer only asks for a password, don't run BIOS Recovery hoping to remove authentication.</li>
           </ul>
           <p><a href="https://nexxgsm.com/blog/dell-bios-recovery-vs-password-reset?lang=en-US" target="_blank" rel="noopener">Read the original guide →</a></p>
-        </div>
+        </div></div>
       </details>
 
       <details class="clay-card guide">
         <summary>Is there a default or master Dell BIOS password?</summary>
-        <div class="guide-body">
+        <div class="guide-wrap"><div class="guide-body">
           <p>There is no universal default Dell BIOS password. Admin and System passwords are set per device — there is no shared word for the whole lineup. “Not Set” means no password is assigned, not that there is a password to type in.</p>
           <h3>The direct answer</h3>
           <p>Dell does not publish a factory or universal master password that unlocks any Dell computer. System, Admin/Setup, and Hard Drive passwords protect different things and may have been set by the owner, a previous owner, an employer, or corporate IT policy. A word from an internet list proves nothing about your device, and repeated guessing can cause delays or lockout.</p>
@@ -357,7 +432,7 @@
             <li>Don't expect a CMOS battery pull to clear a modern Dell laptop's password.</li>
           </ul>
           <p><a href="https://nexxgsm.com/blog/dell-bios-default-master-password?lang=en-US" target="_blank" rel="noopener">Read the original guide →</a></p>
-        </div>
+        </div></div>
       </details>
     </section>
 
@@ -423,6 +498,45 @@
       Object.keys(map).forEach(function (id) {
         var s = document.getElementById(id);
         if (s) io.observe(s);
+      });
+    })();
+
+    // Ак intentionally: guides = акордеон "тільки один відкритий" + плавна анімація 0fr->1fr.
+    // <details> сам не анімує висоту, тому перехоплюємо toggle: анімуємо .guide-wrap (grid-rows),
+    // а атрибут open ставимо одразу (вміст прихований overflow:hidden обгортки).
+    // .expanding тримає суцільний фон під час анімації, поки [open]-селектор ще не активний/уже не активний.
+    (function () {
+      var guides = Array.prototype.slice.call(document.querySelectorAll('details.guide'));
+      if (!guides.length) return;
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function closeNow(g) {
+        g.open = false; g.classList.remove('open'); g.classList.remove('expanding');
+      }
+      guides.forEach(function (g) {
+        g.addEventListener('toggle', function () {
+          if (!g.open) return; // закриття обробляється вручну нижче
+          // відкриття: закрити інші (поведінка акордеона)
+          guides.forEach(function (o) { if (o !== g && o.open) closeNow(o); });
+          g.classList.add('open');
+          if (reduced) return; // без анімації — просто стан
+          requestAnimationFrame(function () {
+            g.classList.add('expanding');
+            setTimeout(function () { g.classList.remove('expanding'); }, 350);
+          });
+        });
+        g.addEventListener('click', function (e) {
+          // summary клікається стандартно; перехоплюємо щоб анімувати закриття
+          if (!e.target.closest('summary')) return;
+          if (g.open) {
+            e.preventDefault();
+            g.classList.remove('open');
+            g.classList.add('expanding');
+            setTimeout(function () {
+              g.classList.remove('expanding');
+              g.open = false;
+            }, reduced ? 0 : 320);
+          }
+        });
       });
     })();
 

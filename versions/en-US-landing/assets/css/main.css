@@ -331,7 +331,36 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 .guide[open] summary::after { transform: rotate(45deg); }
 .guide[open] summary { color: var(--accent); }
 
+/* Розкритий акордеон: фон ~85% непрозорості — текст читається, але фон трохи "дихає" крізь картку.
+   Це значення обрав користувач (0.95 було "занадто суцільним"). Правило стоїть ПІСЛЯ .clay-card:hover,
+   інакше hover (rgba 255 0.1) перекриє фон відкритої картки. */
+.guide[open] {
+  background: rgba(13, 13, 17, 0.85);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
 .guide-body { padding-top: 12px; color: var(--text-2); font-size: 15px; line-height: 1.7; }
+
+/* Плавне розкриття: JS анімує grid-template-rows 0fr->1fr (клас .expanding),
+   той самий viewBox що й у розкритої картки. Поки триває анімація, [open]-стилі
+   (фон/тінь) застосовуються через клас .expanding — інакше фон "стрибав" би на кадр раніше висоти.
+   overflow:hidden тримає вміст прихованим під час стиснення. Не "спрощувати" до display-toggle —
+   це і є причина стрибків висоти сторінки без анімації. */
+.guide .guide-wrap {
+  display: grid; grid-template-rows: 0fr;
+  overflow: hidden;
+  transition: grid-template-rows 0.32s ease;
+}
+.guide.open .guide-wrap { grid-template-rows: 1fr; }
+.guide.open > summary::after { transform: rotate(45deg); }
+.guide.open > summary { color: var(--accent); }
+.guide.open, .guide.expanding {
+  background: rgba(13, 13, 17, 0.85);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+.guide { transition: background 0.32s ease, box-shadow 0.32s ease; }
 .guide-body h3 {
   font-family: var(--font-display); font-size: 15px; letter-spacing: 0.01em;
   color: var(--text); margin: 18px 0 8px;
