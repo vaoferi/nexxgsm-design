@@ -128,11 +128,9 @@ async function testVersion(versionPath, versionLabel) {
 }
 
 async function main() {
-  const usPath = path.resolve(__dirname, '../versions/en-US/index.html');
-  const inPath = path.resolve(__dirname, '../versions/en-IN/index.html');
+  const canonicalPath = path.resolve(__dirname, '../versions/en-US-landing/index.html');
 
-  await testVersion(usPath, 'en-US');
-  await testVersion(inPath, 'en-IN');
+  await testVersion(canonicalPath, 'en-US-landing');
 }
 
 main().catch(console.error);

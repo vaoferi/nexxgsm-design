@@ -16,8 +16,8 @@
   ],
   "scenarios": [
     {
-      "label": "en-US Homepage",
-      "url": "file://../versions/en-US/index.html",
+      "label": "en-US-landing (canonical)",
+      "url": "file://../versions/en-US-landing/index.html",
       "referenceUrl": "",
       "readyEvent": "",
       "readySelector": "",
@@ -34,8 +34,9 @@
       "requireSameDimensions": true
     },
     {
-      "label": "en-IN Homepage",
-      "url": "file://../versions/en-IN/index.html",
+      "label": "en-US-landing FAQ open",
+      "url": "file://../versions/en-US-landing/index.html",
+      "clickSelector": ".faq details:first-of-type summary",
       "referenceUrl": "",
       "readyEvent": "",
       "readySelector": "",

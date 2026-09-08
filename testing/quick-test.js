@@ -9,9 +9,9 @@ for (let w = 320; w <= 1920; w += 10) {
 
 (async () => {
   const browser = await chromium.launch();
-  const results = { 'en-US': [], 'en-IN': [] };
+  const results = { 'en-US-landing': [] };
   
-  for (const version of ['en-US', 'en-IN']) {
+  for (const version of ['en-US-landing']) {
     console.log('Testing ' + version + '...');
     for (const vp of views) {
       const page = await browser.newPage();
