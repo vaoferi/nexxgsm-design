@@ -68,7 +68,13 @@ cd versions && python3 -m http.server 8080
 # → http://localhost:8080/en-US-landing/
 ```
 
-## Production (remote NAS)
+## Production
+
+**Platform decision (2026-09-09):** production is moving to **Cloudflare Pages** under the brand domain **https://biosunlocktool.com/** — monorepo `vaoferi/biosunlocktool` with i18n versions, routed by subdomains (us → en-US, in → en-IN, de → de-DE, pl → pl-PL, af → af-ZA). Free plan: Universal SSL built in, 500 builds/day, 100 GB bandwidth. Full rationale: `docs/architecture-decisions.md`.
+
+The NAS setup below stays as **staging/backup** until the Cloudflare deployment takes traffic — do not tear it down.
+
+## Production (remote NAS — staging)
 
 The canonical landing runs as a Docker container on the Synology NAS (DS720+, host `NAS`), served by `nginx:1.27-alpine` on **port 18080** and published to the internet through the outer Keenetic (`nlm.help`, Peak KN-2710) port forward:
 
