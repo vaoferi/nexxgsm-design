@@ -5,7 +5,10 @@
   --text: #f5f5fa;
   --text-2: #b8b8c8;
   --mute: #a0a0b0;
-  --card: rgba(255, 255, 255, 0.06);
+  /* Скляні поверхні: токен затемнено (0.06 → 0.045) — більше «скла», менше «молока».
+     Пакет за побажанням користувача (2026-09-09): +5–10% затемнення кожній скляній
+     поверхні, посилений blur (матовість), text-shadow на текстах скла. */
+  --card: rgba(255, 255, 255, 0.045);
   --card-border: rgba(255, 255, 255, 0.12);
   --accent: #5a9ff0;
   --accent-2: #1a6e6a;
@@ -33,11 +36,18 @@ body {
   html { scroll-behavior: auto; }
   .char-8::before, .char-8::after, .char-8-mirror::before, .char-8-mirror::after,
   .char-f::before, .char-f::after, .char-c::before { animation: none; }
-  .btn-buy, .btn-telegram, .btn-paypal, .btn-tg, .clay-card, .nav-pill { transition: none; }
+  .btn-buy, .btn-telegram, .btn-paypal, .btn-tg, .clay-card, .nav-pill, .nav-pills { transition: none; }
 }
 
 a { color: inherit; text-decoration: none; }
 button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+/* Тіні під текстом скла: hero-заголовок, заголовки секцій, eyebrow, картки продуктів,
+   кроки, summary гайдів, buy-блок. М'яка широка тінь (не обведення) — текст читається
+   поверх анімованого фону і скла без візуального «бруду». За побажанням (2026-09-09). */
+.title, .section-title, .eyebrow, .product h3, .product p, .step-item, .guide summary, .buy-card h2, .buy-card p {
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+}
 
 #bg-three { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 #bg-three canvas { display: block; width: 100% !important; height: 100% !important; }
@@ -58,8 +68,8 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
   position: sticky; top: 12px; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
   gap: 12px; padding: 12px 16px;
-  background: rgba(14, 14, 18, 0.58); /* прозоріший хедер: фон і WebGL-анімація проглядаються, blur тримає читабельність */
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  background: rgba(14, 14, 18, 0.45); /* 0.65→0.45: експеримент користувача «ще прозорішим»; читабельність на скролі над світлими ділянками — під питанням, див. аналіз контрасту в рев'ю. Відкат: 0.65. */
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
   border: 1px solid var(--card-border); border-radius: 999px;
   margin-bottom: 32px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
@@ -116,7 +126,13 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 .cta-text { font-size: 14px; font-weight: 500; }
 
 /* HERO */
-.hero { padding: 24px 0 32px; }
+/* 32→56 (2026-09-09): користувач — «низ hero занадто близько до краю видимого екрана».
+   Рядок довіри (.hero-trust) видував секцію вниз. Те саме значення в @media ≤900 нижче. */
+.hero { padding: 24px 0 56px; }
+
+.hero-trust {
+  margin-top: 16px; font-size: 14px; color: var(--mute); letter-spacing: 0.01em;
+}
 
 .eight-shape {
   display: flex; align-items: center; justify-content: center;
@@ -143,12 +159,12 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 .char-8-mirror::before { animation: eightBreath 4s ease-in-out infinite reverse; }
 .char-8-mirror::after { animation: eightBreath 4s ease-in-out infinite; }
 
-/* F: жирні пропорції (стійка 26px, рамени 26px), щоб візуально важив як
-   круглі 8/C поруч. Товщини узгоджені з .char у всіх брейкпоінтах —
-   якщо міняєш .char, онови і тут, і в @media 1400/768/480/360. */
+/* F: жирні пропорції (стійка 32px, рамени 32px) — вибір користувача «Жирна»,
+   щоб фігура важила поруч із круглими 8/C. Товщини узгоджені з .char у всіх
+   брейкпоінтах — якщо міняєш .char, онови і тут, і в @media 1400/768/480/360. */
 .char-f::before {
   content: ''; position: absolute;
-  left: 16px; top: 16px; width: 26px; height: 128px;
+  left: 30px; top: 16px; width: 32px; height: 126px;
   background: linear-gradient(#0e4a8a, #0d3d3d);
   border-radius: 8px;
   animation: eightBreath 4s ease-in-out infinite reverse;
@@ -156,10 +172,10 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 
 .char-f::after {
   content: ''; position: absolute;
-  left: 16px; top: 16px; width: 58px; height: 26px;
+  left: 30px; top: 16px; width: 56px; height: 32px;
   background: linear-gradient(#0e4a8a, #0d3d3d);
   border-radius: 8px;
-  box-shadow: 0 58px 0 #0d3d3d;
+  box-shadow: 0 62px 0 #0d3d3d;
   animation: eightBreath 4s ease-in-out infinite;
 }
 
@@ -167,9 +183,22 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
   content: ''; position: absolute;
   left: 8px; top: 8px; width: 76px; height: 142px;
   border-radius: 50%;
-  background: conic-gradient(from 135deg, #0e4a8a, transparent 55%);
-  mask-image: linear-gradient(transparent 15%, black 32%);
-  -webkit-mask-image: linear-gradient(transparent 15%, black 32%);
+  /* C як жирна дуга: конус малює колір + клиновий рот праворуч (0° = вгору,
+     90° = праворуч; рот 64–116°), радіальна маска вибирає отвір.
+     ВАЖЛИВО (тут уже було зламано): в radial-gradient(ellipse W H) W і H — це
+     РАДІУСИ отвору, не його розміри! Отвір 12×78px при коробці 76×142 =
+     радіуси 7.9% × 27.5%. Колись записали розміри як радіуси (52.6%/73.2%) —
+     отвір став 80×208, більший за фігуру, і C ПОВНІСТЮ зникла з продакшну.
+     Перевірка: радіус ≤ 50% відповідної сторони коробки.
+     Товщина кільця 32px = стійка F (вибір користувача «жирна як F»).
+     Якщо міняєш кути рота або маску — дивись фігуру наживо на проді. */
+  background: conic-gradient(from 0deg,
+    #0d3d3d 0deg, #0e4a8a 62deg,
+    transparent 64deg 116deg,
+    #0e4a8a 118deg, #0d3d3d 300deg,
+    #0e4a8a 356deg, #0d3d3d 360deg);
+  mask-image: radial-gradient(ellipse 7.9% 27.5% at 50% 50%, transparent 97%, black 100%);
+  -webkit-mask-image: radial-gradient(ellipse 7.9% 27.5% at 50% 50%, transparent 97%, black 100%);
   animation: eightBreath 4s ease-in-out infinite;
 }
 
@@ -227,7 +256,6 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 }
 .btn-buy:hover { transform: translateY(-2px); }
 .buy-label { font-family: var(--font-display); }
-.buy-price { opacity: 0.8; font-weight: 500; }
 
 .btn-telegram {
   display: inline-flex; align-items: center; gap: 8px;
@@ -245,9 +273,11 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .clay-card {
   background: var(--card); border: 1px solid var(--card-border);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); /* матовість карток продуктів/гайдів/buy */
   border-radius: 20px; padding: 28px; transition: all 0.3s;
 }
 .clay-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-4px); }
+.product.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 8px 32px rgba(0,0,0,0.4); }
 
 .prod-icon {
   width: 48px; height: 48px; background: rgba(255,255,255,0.08);
@@ -273,6 +303,7 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
   display: flex; flex-direction: column; align-items: center; gap: 10px;
   text-align: center; padding: 24px 16px;
   background: var(--card); border: 1px solid var(--card-border); border-radius: 16px;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); /* матовість кроків */
   font-size: 15px; font-weight: 500; color: var(--text);
 }
 .step-item .n {
@@ -305,13 +336,7 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 .btn-tg:hover { background: #005588; transform: translateY(-2px); }
 .btn-tg svg { width: 18px; height: 18px; }
 
-/* FAQ */
-.faq { margin: 34px 0; }
-.faq details { margin-bottom: 12px; cursor: pointer; }
-.faq summary { font-weight: 600; font-size: 16px; padding: 4px 0; list-style: none; color: var(--text); }
-.faq summary::-webkit-details-marker { display: none; }
-.faq details[open] summary { color: var(--accent); }
-.faq details p { color: var(--text-2); font-size: 15px; padding-top: 12px; line-height: 1.7; }
+/* FAQ-секцію видалено (гайди покривають ті питання); стилі .faq прибрано 2026-09-08 */
 
 /* RELATED GUIDES — accordion */
 .related-guides { margin: 34px 0; }
@@ -335,8 +360,8 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
    Це значення обрав користувач (0.95 було "занадто суцільним"). Правило стоїть ПІСЛЯ .clay-card:hover,
    інакше hover (rgba 255 0.1) перекриє фон відкритої картки. */
 .guide[open] {
-  background: rgba(13, 13, 17, 0.85);
-  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  background: rgba(13, 13, 17, 0.92); /* 0.85→0.92: +7% затемнення скла за побажанням (0.95 було «занадто суцільним» — не повертати) */
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); /* 24→28px: матовість */
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
@@ -356,8 +381,8 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 .guide.open > summary::after { transform: rotate(45deg); }
 .guide.open > summary { color: var(--accent); }
 .guide.open, .guide.expanding {
-  background: rgba(13, 13, 17, 0.85);
-  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  background: rgba(13, 13, 17, 0.92); /* 0.85→0.92: +7% затемнення скла за побажанням (0.95 було «занадто суцільним» — не повертати) */
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); /* 24→28px: матовість */
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 .guide { transition: background 0.32s ease, box-shadow 0.32s ease; }
@@ -380,7 +405,19 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
   background: rgba(90, 159, 240, 0.08);
 }
 
+/* CTA-блок після гайдів: скло в мові решти карток (var(--card) + blur(10px)) */
+.after-guides-cta {
+  margin-top: 24px; padding: 32px; text-align: center;
+  background: var(--card); border: 1px solid var(--card-border); border-radius: 20px;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.after-guides-cta h2 { font-family: var(--font-display); font-size: 22px; margin-bottom: 8px; }
+.after-guides-cta p { color: var(--text-2); margin-bottom: 20px; }
+
 /* FOOTER */
+.site-footer strong { color: var(--text); font-weight: 600; }
+.site-footer a { text-decoration: underline; text-underline-offset: 3px; }
+.site-footer a:hover { color: var(--text); }
 .site-footer {
   text-align: center; padding: 40px 0 20px; color: var(--mute);
   font-size: 13px; border-top: 1px solid var(--card-border); margin-top: 40px;
@@ -391,8 +428,8 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
   .page { max-width: 1320px; padding: 32px 48px 80px; }
   .char { width: 118px; height: 200px; }
   .char-8::before, .char-8::after, .char-8-mirror::before, .char-8-mirror::after { width: 118px; height: 118px; }
-  .char-f::before { left: 22px; top: 20px; width: 32px; height: 162px; }
-  .char-f::after { left: 22px; top: 20px; width: 72px; height: 32px; box-shadow: 0 72px 0 #0d3d3d; }
+  .char-f::before { left: 39px; top: 20px; width: 40px; height: 160px; }
+  .char-f::after { left: 39px; top: 20px; width: 70px; height: 40px; box-shadow: 0 80px 0 #0d3d3d; }
   .char-c::before { width: 100px; height: 172px; }
 }
 
@@ -408,21 +445,33 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
   .nav-toggle { display: inline-flex; order: 2; margin-left: auto; }
   .header-cta { order: 3; }
   .nav-pills {
-    display: none;
+    /* Панель НЕ display:none↔flex (миттєве показ/ховання), а завжди в дереві:
+       absolute не штовхає контент, visibility:hidden прибирає з таб/скрінрідера.
+       Це дає справжню двосторонню fade+slide анімацію; JS і клас .open не змінені.
+       visibility transition: при хованні спрацьовує ПІСЛЯ fade (delay 0.25s),
+       інакше панель зникла б миттєво до анімації. */
+    display: flex;
     position: absolute; top: calc(100% + 8px); left: 0; right: 0;
     flex-direction: column; gap: 4px; padding: 10px;
-    background: rgba(14, 14, 18, 0.97);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(14, 14, 18, 0.98); /* +1%: панель і так майже суцільна, посилено тільки blur (28px) */
+    backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); /* матовість панелі — узгоджено з хедером */
     border: 1px solid var(--card-border); border-radius: 24px;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+    opacity: 0; transform: translateY(-8px);
+    visibility: hidden; pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
   }
-  .nav-pills.open { display: flex; }
+  .nav-pills.open {
+    opacity: 1; transform: translateY(0);
+    visibility: visible; pointer-events: auto;
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s;
+  }
   .nav-pill { padding: 12px 18px; font-size: 15px; text-align: left; }
   .products-grid { grid-template-columns: 1fr; max-width: 500px; margin-left: auto; margin-right: auto; }
   .step-row { grid-template-columns: repeat(2, 1fr); max-width: 500px; margin-left: auto; margin-right: auto; }
   .guides-grid { grid-template-columns: repeat(2, 1fr); }
   .title { font-size: clamp(34px, 7vw, 56px); }
-  .hero { padding: 24px 0 32px; }
+  .hero { padding: 24px 0 56px; }
 }
 
 /* RESPONSIVE — Mobile large */
@@ -433,8 +482,8 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
   .eight-shape { gap: 16px; }
   .char { width: 90px; height: 160px; }
   .char-8::before, .char-8::after, .char-8-mirror::before, .char-8-mirror::after { width: 90px; height: 90px; }
-  .char-f::before { left: 16px; width: 24px; height: 130px; }
-  .char-f::after { left: 16px; width: 52px; height: 24px; box-shadow: 0 56px 0 #0d3d3d; }
+  .char-f::before { left: 30px; width: 30px; height: 128px; }
+  .char-f::after { left: 30px; width: 54px; height: 30px; box-shadow: 0 68px 0 #0d3d3d; }
   .char-c::before { width: 70px; height: 140px; }
   .products-grid { gap: 16px; }
   .buy-card { padding: 32px 24px; }
@@ -451,12 +500,11 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
   .eight-shape { gap: 10px; }
   .char { width: 70px; height: 130px; }
   .char-8::before, .char-8::after, .char-8-mirror::before, .char-8-mirror::after { width: 70px; height: 70px; }
-  .char-f::before { left: 12px; width: 20px; height: 105px; }
-  .char-f::after { left: 12px; width: 44px; height: 20px; box-shadow: 0 45px 0 #0d3d3d; }
+  .char-f::before { left: 23px; width: 24px; height: 106px; }
+  .char-f::after { left: 23px; width: 42px; height: 24px; box-shadow: 0 58px 0 #0d3d3d; }
   .char-c::before { width: 55px; height: 110px; }
   .clay-card { padding: 24px 20px; }
   .title { letter-spacing: -0.02em; }
-  .faq details p { font-size: 14px; }
 }
 
 /* RESPONSIVE — Very small */
@@ -464,7 +512,7 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
   .eight-shape { gap: 8px; }
   .char { width: 60px; height: 110px; }
   .char-8::before, .char-8::after, .char-8-mirror::before, .char-8-mirror::after { width: 60px; height: 60px; }
-  .char-f::before { left: 10px; width: 17px; height: 90px; }
-  .char-f::after { left: 10px; width: 38px; height: 17px; box-shadow: 0 39px 0 #0d3d3d; }
+  .char-f::before { left: 19px; width: 21px; height: 90px; }
+  .char-f::after { left: 19px; width: 37px; height: 21px; box-shadow: 0 48px 0 #0d3d3d; }
   .char-c::before { width: 45px; height: 90px; }
 }
