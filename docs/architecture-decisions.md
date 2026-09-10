@@ -152,6 +152,7 @@ Firefox, reduced-motion і без JavaScript.
 - Контейнер **bind-mount-ить** папку `/volume1/homes/vaoferi/Work/8fc8/nexxgsm-design/versions/en-US-landing/` (read-only) як web-root. Ця ж папка змонтована на робочій станції як `/Volumes/Work/8fc8`. **Зміна файлу = деплой**, без rebuild і копіювання.
 - Публікація: порт-форвардинг на зовнішньому Keenetic через RCI `ip static` (`GigabitEthernet1 tcp 18080 → MAC 90:09:d0:06:1c:92`, comment `nexxgsm-landing`), конфіг збережено.
 - Публічний URL: **http://nlmhelp.keenetic.link:18080/**
+- DNS wildcard для `*.nlmhelp.keenetic.link` уже покриває короткі staging-host-и `us`, `ca`, `in`, `de`, `pl`, `af`; нові port-forward правила не потрібні, бо всі вони використовують існуючий `18080`.
 
 ### Чому так
 
@@ -171,6 +172,7 @@ Firefox, reduced-motion і без JavaScript.
 - `nexxgsm-design/README.md` — розділ «Production (remote NAS)», інструкція відтворення.
 - Контейнер `nexxgsm-landing` на NAS; правило `ip static` 18080 на зовнішньому Keenetic (index `ca82df028405342ed0d67ab7e04a75bb`).
 - Джерело контенту: `/volume1/homes/vaoferi/Work/8fc8/nexxgsm-design/versions/en-US-landing/` = `/Volumes/Work/8fc8/nexxgsm-design/versions/en-US-landing/`.
+- Host-aware CSS читає `window.location.hostname`: `in.nlmhelp.keenetic.link:18080` отримує India-атмосферу, а root/інші market-host-и залишаються US baseline до окремого design pass.
 
 ### Відкриті питання (не блокують)
 

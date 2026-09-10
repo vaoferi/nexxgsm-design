@@ -14,7 +14,7 @@
 - motion layer: `scroll-progress` і reveal-анімації карток/кроків/гайдів використовують native CSS Scroll-Driven Animations, а старі браузери — IntersectionObserver fallback; reduced-motion залишає контент видимим і статичним;
 - India market: канонічний короткий host `in.biosunlocktool.com` (старий `india.biosunlocktool.com` лишається compatibility alias) використовує той самий English canonical landing, але host-aware `data-market="india"` вмикає окрему абстрактну атмосферу з indigo/navy, saffron і dark green; US apex та невідомі host-и лишаються без цього override;
 - зафіксовано `$impeccable critique`: 25/36 за 9 застосовними евристиками, без P0, чотири P1 для наступної ітерації; контраст і overflow перевірені браузером;
-- NAS `http://nlmhelp.keenetic.link:18080/` — staging із bind-mount (зміна файлу видима одразу); production оновлюється окремим sync → GitHub Action циклом;
+- NAS `http://nlmhelp.keenetic.link:18080/` — staging із bind-mount (зміна файлу видима одразу); короткі market-host-и `us.nlmhelp.keenetic.link:18080`, `ca.nlmhelp.keenetic.link:18080`, `in.nlmhelp.keenetic.link:18080`, `de.nlmhelp.keenetic.link:18080`, `pl.nlmhelp.keenetic.link:18080`, `af.nlmhelp.keenetic.link:18080` використовують той самий порт; production оновлюється окремим sync → Cloudflare deploy циклом;
 - canonical/og:url, favicon, selected-plan sync і чесний PayPal coming-soon стан перевірені на production після Action `2f69c19`.
 
 **Що змінюємо:** у поточній ітерації стабілізуємо візуальний фон на mobile/desktop: зберігаємо ПК-wow-ефект на широких екранах, прибираємо строкатий procedural noise і даємо mobile той самий легкий анімований CSS-градієнт; остання корекція користувача — приблизно вдвічі темніша палітра без затемнення ПК. Окрема India-ітерація додає тільки host-aware атмосферу, без дублювання копії, перекладів або зміни конверсійного сценарію. У цій ітерації також зафіксовані canonical/og:url, monitor-with-code favicon, data-pick → pay-row sync, sticky-anchor правила, PRODUCT.md і nexxgsm-workflow skill.
@@ -43,6 +43,7 @@
 - регресії: `node testing/quick-test.js` (overflow-свуп; очікує сервер на :8080 з `versions/`);
 - текстові файли: UTF-8 без BOM, скан на mojibake (Рџ/РЅ/�).
 - India smoke: у браузері `in.biosunlocktool.com` має `data-market="india"`, saffron `--accent`, завантажений `main.css?v=20260910u`, чисту консоль і canonical `https://biosunlocktool.com/`; apex має `data-market="us"`.
+- NAS host smoke: `in.nlmhelp.keenetic.link:18080` має `data-market="india"`, а root/`us`/`ca`/`de`/`pl`/`af` на тому самому порту мають US baseline.
 
 **Критерії готовності поточного етапу (виконані):**
 - [x] канонічна версія консолідована, неканонічні видалені;

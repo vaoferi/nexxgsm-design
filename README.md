@@ -76,7 +76,7 @@ cd versions && python3 -m http.server 8080
 
 ## Production
 
-**Live since 2026-09-09:** production runs on **Cloudflare Pages** at **https://biosunlocktool.com/** (www included) — monorepo `vaoferi/biosunlocktool`, deploys via GitHub Action on push to `main`. Routing decision confirmed: the apex serves the canonical en-US straight from the repo root; subdomains `in./de./pl./af.` map to `/locales/<locale>/`.
+**Live since 2026-09-09:** production runs on **Cloudflare Pages** at **https://biosunlocktool.com/** (www included) — monorepo `vaoferi/biosunlocktool`. Market hosts use short codes: `us`/`ca`/`in` serve the canonical English landing (`in` adds the India atmosphere), while `de`/`pl`/`af` map to their locale folders.
 
 **Surface priority (user decision 2026-09-09):** test everything on the NAS staging surface first; only verified changes get deployed to production (sync canonical → push → green Action).
 
@@ -87,6 +87,12 @@ Full rationale: `docs/architecture-decisions.md`.
 The canonical landing runs as a Docker container on the Synology NAS (DS720+, host `NAS`), served by `nginx:1.27-alpine` on **port 18080** and published to the internet through the outer Keenetic (`nlm.help`, Peak KN-2710) port forward:
 
 > **http://nlmhelp.keenetic.link:18080/**
+
+The staging DNS is wildcarded, so the same port is available with the same short market codes:
+`http://us.nlmhelp.keenetic.link:18080/`, `http://ca.nlmhelp.keenetic.link:18080/`,
+`http://in.nlmhelp.keenetic.link:18080/`, `http://de.nlmhelp.keenetic.link:18080/`,
+`http://pl.nlmhelp.keenetic.link:18080/`, and `http://af.nlmhelp.keenetic.link:18080/`.
+The staging landing reads the hostname client-side; `in` gets the India theme and the other hosts remain the US baseline until their visual variants are designed.
 
 - **Content source of truth:** the NAS folder `/volume1/homes/vaoferi/Work/8fc8/nexxgsm-design/versions/en-US-landing/` — the same folder mounted on this workstation as `/Volumes/Work/8fc8`. Editing files here deploys to staging instantly (nginx bind-mounts the folder read-only, no rebuild or copy step). Use this surface to verify every change **before** releasing to production — it is not a backup to tear down, it is the pre-release test bench.
 - **Container:** `nexxgsm-landing` (`docker run -d --name nexxgsm-landing --restart unless-stopped -p 18080:80 -v <folder>:/usr/share/nginx/html:ro nginx:1.27-alpine`), managed via SSH (`vaoferi@176.97.56.70 -p 2222`, docker needs `sudo` on Synology).

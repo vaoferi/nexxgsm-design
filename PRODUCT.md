@@ -27,7 +27,7 @@ The landing combines a short product choice, Dell-specific password triage, and 
 ## Operating Context
 
 - Canonical source: `versions/en-US-landing/` in this repository.
-- Staging/test surface: `http://nlmhelp.keenetic.link:18080/`, served from the Synology bind mount.
+- Staging/test surface: `http://nlmhelp.keenetic.link:18080/`, served from the Synology bind mount. Short market hosts are also available on the same port: `us.`, `ca.`, `in.`, `de.`, `pl.`, `af.` + `nlmhelp.keenetic.link`; `in` enables the India theme.
 - Production surface: `https://biosunlocktool.com/` on Cloudflare Pages; the NAS staging surface must be checked before a production release.
 - The workflow is static-file editing → NAS browser verification → canonical sync to `vaoferi/biosunlocktool` → Cloudflare build/deploy → production smoke test.
 
