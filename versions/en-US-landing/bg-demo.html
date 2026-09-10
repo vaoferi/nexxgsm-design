@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>BG DEMO — variant B (monitor + keyboard scene)</title>
+<title>BG DEMO — variant B (monitor + keyboard scene, scroll parallax)</title>
 <!-- NAS-ONLY демо для вибору варіанта фону (2026-09-09). НЕ синхронізувати в CF-репо:
      перед будь-яким релізом у прод — ВИДАЛИТИ цей файл з версії (разом з bg-scene.js,
      якщо варіант B відхилено). Канонічний index.html цей файл не підключає. -->
@@ -29,6 +29,15 @@
   .demo-h1 { font-size: clamp(28px, 5vw, 52px); line-height: 1.05; margin: 18px 0 10px; max-width: 560px; }
   .demo-p { color: #b9c0cf; max-width: 440px; line-height: 1.6; }
   .demo-actions { margin-top: 22px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .demo-section {
+    min-height: 100vh; position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    color: #b9c0cf; font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .demo-section span {
+    background: rgba(10,10,16,.6); backdrop-filter: blur(8px);
+    padding: 10px 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,.14);
+  }
   .demo-btn {
     padding: 12px 22px; border-radius: 14px; text-decoration: none; font-weight: 600;
     background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); color: #fff;
@@ -44,13 +53,17 @@
   <div class="demo-ui">
     <span class="demo-badge">BG DEMO · VARIANT B · NAS-ONLY</span>
     <h1 class="demo-h1">Remove or recover any Dell BIOS password</h1>
-    <p class="demo-p">Сцена «монітор + клавіатура»: переливи — вміст екрана, світлова пляма — на підлозі. Текст зліва — перевірка читабельності над сценою.</p>
+    <p class="demo-p">Сцена «монітор + клавіатура»: переливи — вміст екрана, світлова пляма — на підлозі. Монітор притиснутий до правого краю, стоїть на підставці, клавіатура підсвічена екраном. Скрольте: сцена уходить вправо і повертається справа.</p>
     <div class="demo-actions">
       <a class="demo-btn" href="./">← Back to canonical (variant A)</a>
       <a class="demo-btn" href="bg-demo-c.html">Variant C (bloom + glints + shadow) →</a>
     </div>
   </div>
 
-  <script type="module" src="assets/js/bg-scene.js?v=20260909c"></script>
+  <div class="demo-section"><span>↓ скрол — сцена уходить вправо</span></div>
+  <div class="demo-section"><span>ще один екран</span></div>
+  <div class="demo-section"><span>↑ скрол вгору — сцена повертається справа</span></div>
+
+  <script type="module" src="assets/js/bg-scene.js?v=20260910a"></script>
 </body>
 </html>

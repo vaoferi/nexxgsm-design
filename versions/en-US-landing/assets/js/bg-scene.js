@@ -153,23 +153,36 @@ const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), floorMat);
 floor.rotation.x = -Math.PI / 2;
 world.add(floor);
 
-// Монітор: рама + стійка + екран
+// Монітор: рама + стійка + ніжка-підставка + екран. Ніжка — трапецієвидна підставка
+// (Shape → ExtrudeGeometry: екструзія по Z), бо реальні монітори стоять на широкій
+// підставці, а не на стовпчику; трапеція читається здалеку і в профіль сховає стійку.
 const bodyMat = new THREE.MeshStandardMaterial({ color: 0x14141c, roughness: 0.7, metalness: 0.15 });
 const frame = new THREE.Mesh(new THREE.BoxGeometry(2.16, 1.46, 0.07), bodyMat);
 frame.position.set(0, 1.0, 0.42);
 const stand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.38, 0.12), bodyMat);
 stand.position.set(0, 0.19, 0.44);
+// Трапеція ніжки: основа 0.9, верх 0.3, висота 0.05 (в XZ-площині, товщина по Y)
+const footShape = new THREE.Shape();
+footShape.moveTo(-0.45, 0);
+footShape.lineTo(0.45, 0);
+footShape.lineTo(0.15, 0.22);
+footShape.lineTo(-0.15, 0.22);
+footShape.closePath();
+const footGeo = new THREE.ExtrudeGeometry(footShape, { depth: 0.05, bevelEnabled: false });
+footGeo.rotateX(-Math.PI / 2); // екструзія по Y вгору; тепер «висота трапеції» лежить по Z
+const foot = new THREE.Mesh(footGeo, bodyMat);
+foot.position.set(0, 0, 0.55);
 const screenMat = addTimed(new THREE.ShaderMaterial({
   vertexShader: UV_VERT, fragmentShader: SCREEN_FRAG,
   uniforms: { uTime: { value: 0 } },
 }));
 const screen = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 1.3), screenMat);
 screen.position.set(0, 1.0, 0.462);
-world.add(frame, stand, screen);
+world.add(frame, stand, foot, screen);
 
 // Клавіатура: геометрія з оригінального пена (база + сітка клавіш)
 const keyboard = new THREE.Group();
-const keyMat = new THREE.MeshStandardMaterial({ color: 0x1a1a22, roughness: 0.88, metalness: 0.06 });
+const keyMat = new THREE.MeshStandardMaterial({ color: 0x23232e, roughness: 0.8, metalness: 0.1 });
 const base = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.045, 0.42), keyMat);
 base.position.y = 0.0225;
 keyboard.add(base);
@@ -188,29 +201,72 @@ for (let rz = 0; rz < rows; rz += 1) {
 keyboard.position.set(0, 0, 1.28);
 world.add(keyboard);
 
-// Світло для пластикових частин (екран і підлога світяться своїми шейдерами і світла не потребують)
+// Світло для пластикових частин. Клавіатура додатково ловить «відблиск екрана»:
+// у пена клавіші підсвічені градієнтом з екрана (spotlight.map), у нас — теплий
+// point light низько над клавіатурою, забарвлений у кольору палітри, + трохи світліший
+// базовий матеріал (0x23232e), інакше клавіші читаються глухою темною плямою.
 scene.add(new THREE.HemisphereLight(0xffffff, 0x060608, 0.25));
 const keyLight = new THREE.PointLight(0xbfd4ff, 6, 9, 2);
 keyLight.position.set(0.4, 2.4, 2.6);
 scene.add(keyLight);
+const screenGlow = new THREE.PointLight(0xffb08a, 14, 7, 2);
+screenGlow.position.set(0, 0.75, 0.9);
+scene.add(screenGlow);
+// Анімація кольору підсвітки: той самий palette() час, що й у шейдерів (uTime) —
+// гало завжди в тон екрану. Дешево: одна lerpColors на кадр замість шейдера.
+const glowA = new THREE.Color(0xffb08a);
+const glowB = new THREE.Color(0x8ab4ff);
+const glowCur = new THREE.Color();
+function syncGlow(tSec) {
+  const m = 0.5 + 0.5 * Math.sin(6.28318 * 0.42 + tSec * 6.28318 * 0.065);
+  glowCur.copy(glowA).lerp(glowB, m);
+  screenGlow.color.copy(glowCur);
+}
 
 function layout() {
   const aspect = window.innerWidth / window.innerHeight;
-  // Широкий екран: сцена зміщена вправо, текст hero читається зліва (як задум лендінгу).
-  // Вузький: сцена по центру і камера відходить назад, щоб монітор вміщався.
-  world.position.x = aspect > 1.15 ? 0.95 : 0;
+  // Широкий екран: сцена зміщена ВПРАВО до краю кадру (замір півширин кадру на глибині
+  // сцени + зсуб 72% від неї — при 45° FOV виходить ~2.5..3.3 світових одиниці на
+  // типових десктопах, тобто монітор впирається в праву межу вʼюпорту). Вузький — центр.
+  const halfW = Math.tan((camera.fov * Math.PI) / 360) * 5.0 * aspect;
+  world.position.x = aspect > 1.15 ? halfW * 0.72 : 0;
   camera.position.set(0, 1.25, aspect > 1.15 ? 5.5 : 7.2);
   camera.lookAt(0, 0.8, 0.4);
   camera.aspect = aspect;
   camera.updateProjectionMatrix();
+  baseX = world.position.x; // фіксуємо для applyScrollX (паралакс додається поверх)
 }
 layout();
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const TIME_SCALE = 0.25; // та сама «спокійна» швидкість, що затверджена для поточного фону
 
+// СКРОЛ-ПАРАЛЛАКС (побажання 2026-09-10): сторінка скролиться вертикально, а сцена
+// уходить ВПРАВО за межі кадру і повертається справа при зворотному скролі — без
+// вертикального зсуву (фон не «пролистується в гору», монітор не пливе вгору від тексту).
+// Увага: використовується world.position.x = baseX + scrollX, де baseX рахує layout()
+// — тому при resize і в щоразовому renderFrame беремо актуальний baseX з layout().
+let baseX = 0; // актуальний базовий зсув (пише layout())
+let scrollX = 0; // поточний паралакс-зсув
+const SCROLL_SPAN = Math.max(window.innerWidth * 0.35, 220); // крок уходу за 1 екран скролу
+
+function applyScrollX() {
+  world.position.x = baseX + scrollX;
+}
+
+window.addEventListener("scroll", () => {
+  if (reducedMotion) return;
+  const y = window.scrollY || 0;
+  const vh = window.innerHeight || 1;
+  const p = Math.min(1, y / vh); // 0 — верх, 1 — один екран проскролено
+  scrollX = p * SCROLL_SPAN;
+  applyScrollX();
+}, { passive: true });
+
 function renderFrame(tSec) {
   for (const m of timeMats) m.uniforms.uTime.value = tSec;
+  syncGlow(tSec);
+  applyScrollX(); // кожен кадр — щоб baseX після resize не конфліктував із паралаксом
   renderer.render(scene, camera);
 }
 renderFrame(0);
@@ -238,7 +294,7 @@ window.addEventListener("resize", () => {
 window.addEventListener("beforeunload", () => {
   if (rafId !== null) cancelAnimationFrame(rafId);
   floorMat.dispose(); screenMat.dispose(); keyMat.dispose(); bodyMat.dispose();
-  floor.geometry.dispose(); frame.geometry.dispose(); stand.geometry.dispose();
+  floor.geometry.dispose(); frame.geometry.dispose(); stand.geometry.dispose(); footGeo.dispose();
   screen.geometry.dispose(); base.geometry.dispose(); keyGeo.dispose();
   renderer.dispose();
 });
