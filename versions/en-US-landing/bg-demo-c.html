@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>BG DEMO — variant B (monitor + keyboard scene)</title>
+<title>BG DEMO — variant C (monitor scene + bloom, glints, contact shadow)</title>
 <!-- NAS-ONLY демо для вибору варіанта фону (2026-09-09). НЕ синхронізувати в CF-репо:
-     перед будь-яким релізом у прод — ВИДАЛИТИ цей файл з версії (разом з bg-scene.js,
-     якщо варіант B відхилено). Канонічний index.html цей файл не підключає. -->
+     перед будь-яким релізом у прод — ВИДАЛИТИ цей файл з версії (разом з bg-scene-c.js,
+     якщо варіант C відхилено). Канонічний index.html цей файл не підключає. -->
 <style>
   html, body { margin: 0; min-height: 100%; background: #0a0a10; }
   #bg-scene { position: fixed; inset: 0; z-index: 0; }
@@ -27,7 +27,7 @@
     background: rgba(10,10,16,.55); backdrop-filter: blur(8px);
   }
   .demo-h1 { font-size: clamp(28px, 5vw, 52px); line-height: 1.05; margin: 18px 0 10px; max-width: 560px; }
-  .demo-p { color: #b9c0cf; max-width: 440px; line-height: 1.6; }
+  .demo-p { color: #b9c0cf; max-width: 460px; line-height: 1.6; }
   .demo-actions { margin-top: 22px; display: flex; gap: 12px; flex-wrap: wrap; }
   .demo-btn {
     padding: 12px 22px; border-radius: 14px; text-decoration: none; font-weight: 600;
@@ -42,15 +42,15 @@
   <div id="bg-fallback"><span>WebGL недоступний — статичний фолбек</span></div>
 
   <div class="demo-ui">
-    <span class="demo-badge">BG DEMO · VARIANT B · NAS-ONLY</span>
+    <span class="demo-badge">BG DEMO · VARIANT C · NAS-ONLY</span>
     <h1 class="demo-h1">Remove or recover any Dell BIOS password</h1>
-    <p class="demo-p">Сцена «монітор + клавіатура»: переливи — вміст екрана, світлова пляма — на підлозі. Текст зліва — перевірка читабельності над сценою.</p>
+    <p class="demo-p">Варіант B + дрібні деталі з пена: bloom-гало екрана, блиски клавіш, контактна тінь. Safari-сумісно: без EffectComposer/UnrealBloom/shadow maps — усе імітовано шейдерами.</p>
     <div class="demo-actions">
-      <a class="demo-btn" href="./">← Back to canonical (variant A)</a>
-      <a class="demo-btn" href="bg-demo-c.html">Variant C (bloom + glints + shadow) →</a>
+      <a class="demo-btn" href="./">← Variant A (canonical)</a>
+      <a class="demo-btn" href="bg-demo.html">← Variant B (чиста сцена)</a>
     </div>
   </div>
 
-  <script type="module" src="assets/js/bg-scene.js?v=20260909c"></script>
+  <script type="module" src="assets/js/bg-scene-c.js?v=20260909c"></script>
 </body>
 </html>
