@@ -13,6 +13,11 @@ import * as THREE from "./vendor/three.module.min.js?v=20260909c";
 //   - bloom        → адитивні halo-квади з радіальним затуханням (перед екраном + за монітором);
 //   - блиски клавіш → ОДИН merged-mesh на всі 30 клавіш (1 draw call) з per-key фазою;
 //   - тінь         → класична fake contact shadow (м'який радіальний градієнт), без shadow maps.
+//
+// Доробка 2026-09-10 (зауваження користувача): у варіанті C була відсутня ПІДСТАВКА
+// монітора — екран тримався на самій стійці, сцена читалась як «пливучий монітор».
+// Перенесено трапецієвидну ніжку з варіанта B (вона ж — форма з пена) і підсвітку
+// клавіш кольором екрана; контактна тінь підведена під нову ніжку.
 
 const app = document.getElementById("bg-scene");
 const fallback = document.getElementById("bg-fallback");
@@ -235,19 +240,31 @@ shadowKeys.position.set(0, 0.002, 1.28);
 shadowKeys.renderOrder = 1;
 world.add(shadowMonitor, shadowKeys);
 
-// Монітор: рама + стійка + екран (як у варіанті B)
+// Монітор: рама + стійка + підставка-трапеція + екран. Трапецієвидна ніжка — з пена
+// (2026-09-10): без неї сцена читалась як «пливучий монітор». Форма: широка основа 0.9,
+// верх 0.3, висота 0.05, товщина по Y 0.05.
 const bodyMat = new THREE.MeshStandardMaterial({ color: 0x14141c, roughness: 0.7, metalness: 0.15 });
 const frame = new THREE.Mesh(new THREE.BoxGeometry(2.16, 1.46, 0.07), bodyMat);
 frame.position.set(0, 1.0, 0.42);
 const stand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.38, 0.12), bodyMat);
 stand.position.set(0, 0.19, 0.44);
+const footShape = new THREE.Shape();
+footShape.moveTo(-0.45, 0);
+footShape.lineTo(0.45, 0);
+footShape.lineTo(0.15, 0.22);
+footShape.lineTo(-0.15, 0.22);
+footShape.closePath();
+const footGeo = new THREE.ExtrudeGeometry(footShape, { depth: 0.05, bevelEnabled: false });
+footGeo.rotateX(-Math.PI / 2);
+const foot = new THREE.Mesh(footGeo, bodyMat);
+foot.position.set(0, 0, 0.55);
 const screenMat = addTimed(new THREE.ShaderMaterial({
   vertexShader: UV_VERT, fragmentShader: SCREEN_FRAG,
   uniforms: { uTime: { value: 0 } },
 }));
 const screen = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 1.3), screenMat);
 screen.position.set(0, 1.0, 0.462);
-world.add(frame, stand, screen);
+world.add(frame, stand, foot, screen);
 
 // BLOOM-ГАЛО: (1) м'який ореол ПЕРЕД екраном; (2) слабке гало ЗА монітором —
 // центр гало перекривається рамкою, тож по контуру монітора лишається світлий рим.
@@ -269,13 +286,14 @@ haloBack.position.set(0, 1.0, 0.37);
 haloBack.renderOrder = 3;
 world.add(haloFront, haloBack);
 
-// Клавіатура: геометрія з оригінального пена (база + сітка клавіш)
+// Клавіатура: геометрія з оригінального пена (база + сітка клавіш).
+// 11×4 замість 10×3 (2026-09-10): силует реальної клавіатури, +1 колонка + ряд. База 1.30×0.045×0.42.
 const keyboard = new THREE.Group();
 const keyMat = new THREE.MeshStandardMaterial({ color: 0x1a1a22, roughness: 0.88, metalness: 0.06 });
-const base = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.045, 0.42), keyMat);
+const base = new THREE.Mesh(new THREE.BoxGeometry(1.30, 0.045, 0.42), keyMat);
 base.position.y = 0.0225;
 keyboard.add(base);
-const cols = 10, rows = 3;
+const cols = 11, rows = 4;
 const keyW = 0.09, keyH = 0.072, keyD = 0.07, gapX = 0.012, gapZ = 0.01;
 const startX = -((cols - 1) * (keyW + gapX)) / 2;
 const startZ = -((rows - 1) * (keyD + gapZ)) / 2;
@@ -343,7 +361,14 @@ scene.add(keyLight);
 
 function layout() {
   const aspect = window.innerWidth / window.innerHeight;
-  world.position.x = aspect > 1.15 ? 0.95 : 0;
+  // Притиснути правий край монітора до правого краю кадру — та сама формула, що у B.
+  // Раніше було hardcoded world.x = 0.95 (довільне число, на 1440x900 монітор стояв майже
+  // по центру); тепер — frame.right = 0.96 * halfW незалежно від aspect.
+  const FRAME_HALF = 1.08;
+  const EDGE_MARGIN = 0.04;
+  const halfW = Math.tan((camera.fov * Math.PI) / 360) * 5.0 * aspect;
+  const targetRight = halfW * (1 - EDGE_MARGIN);
+  world.position.x = aspect > 1.15 ? Math.max(0, targetRight - FRAME_HALF) : 0;
   camera.position.set(0, 1.25, aspect > 1.15 ? 5.5 : 7.2);
   camera.lookAt(0, 0.8, 0.4);
   camera.aspect = aspect;
@@ -385,7 +410,7 @@ window.addEventListener("beforeunload", () => {
   floorMat.dispose(); screenMat.dispose(); keyMat.dispose(); bodyMat.dispose();
   glintMat.dispose(); haloFrontMat.dispose(); haloBackMat.dispose();
   shadowMatMonitor.dispose(); shadowMatKeys.dispose();
-  floor.geometry.dispose(); frame.geometry.dispose(); stand.geometry.dispose();
+  floor.geometry.dispose(); frame.geometry.dispose(); stand.geometry.dispose(); footGeo.dispose();
   screen.geometry.dispose(); base.geometry.dispose(); keyGeo.dispose();
   glintGeo.dispose(); haloFront.geometry.dispose(); haloBack.geometry.dispose();
   shadowMonitor.geometry.dispose(); shadowKeys.geometry.dispose();

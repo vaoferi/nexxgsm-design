@@ -180,13 +180,16 @@ const screen = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 1.3), screenMat);
 screen.position.set(0, 1.0, 0.462);
 world.add(frame, stand, foot, screen);
 
-// Клавіатура: геометрія з оригінального пена (база + сітка клавіш)
+// Клавіатура: геометрія з оригінального пена (база + сітка клавіш).
+// 11×4 замість 10×3 (2026-09-10, зауваження користувача «трошки долити»): попередня
+// розкладка при ширшому екрані виглядала як «дві смужки дрібних кубиків»; +1 колонка
+// зліва + ряд знизу дають силует, ближчий до реальної клавіатури. База 1.30×0.045×0.42.
 const keyboard = new THREE.Group();
 const keyMat = new THREE.MeshStandardMaterial({ color: 0x23232e, roughness: 0.8, metalness: 0.1 });
-const base = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.045, 0.42), keyMat);
+const base = new THREE.Mesh(new THREE.BoxGeometry(1.30, 0.045, 0.42), keyMat);
 base.position.y = 0.0225;
 keyboard.add(base);
-const cols = 10, rows = 3;
+const cols = 11, rows = 4;
 const keyW = 0.09, keyH = 0.072, keyD = 0.07, gapX = 0.012, gapZ = 0.01;
 const startX = -((cols - 1) * (keyW + gapX)) / 2;
 const startZ = -((rows - 1) * (keyD + gapZ)) / 2;
@@ -223,13 +226,31 @@ function syncGlow(tSec) {
   screenGlow.color.copy(glowCur);
 }
 
+// СКРОЛ-ПАРАЛЛАКС (побажання 2026-09-10): сторінка скролиться вертикально, а сцена
+// уходить ВПРАВО за межі кадру і повертається справа при зворотному скролі — без
+// вертикального зсуву (фон не «пролистується в гору», монітор не пливе вгору від тексту).
+// Оголошення ПЕРЕД layout() (2026-09-10): layout() писав у baseX до його ініціалізації —
+// ReferenceError (TDZ), сцена взагалі не рендерилась. Піднято сюди.
+let baseX = 0; // актуальний базовий зсув (пише layout())
+let scrollX = 0; // поточний паралакс-зсув
+const SCROLL_SPAN = Math.max(window.innerWidth * 0.35, 220); // крок уходу за 1 екран скролу
+
+function applyScrollX() {
+  world.position.x = baseX + scrollX;
+}
+
 function layout() {
   const aspect = window.innerWidth / window.innerHeight;
-  // Широкий екран: сцена зміщена ВПРАВО до краю кадру (замір півширин кадру на глибині
-  // сцени + зсуб 72% від неї — при 45° FOV виходить ~2.5..3.3 світових одиниці на
-  // типових десктопах, тобто монітор впирається в праву межу вʼюпорту). Вузький — центр.
+  // Притиснути правий край монітора до правого краю кадру: обчислюємо half-width
+  // фрустума на глибині монітора (5.0 світ. од.), потім — координату world.x, що
+  // кладе правий край frame (FRAME_HALF = 1.08) на (1 - EDGE_MARGIN) * halfW.
+  // Раніше було «фактор 0.72 від halfW» — на 1440x900 правий край обрізало ~30 px;
+  // тепер права рамка стоїть на 4% від краю кадру незалежно від aspect.
+  const FRAME_HALF = 1.08;
+  const EDGE_MARGIN = 0.04;
   const halfW = Math.tan((camera.fov * Math.PI) / 360) * 5.0 * aspect;
-  world.position.x = aspect > 1.15 ? halfW * 0.72 : 0;
+  const targetRight = halfW * (1 - EDGE_MARGIN);
+  world.position.x = aspect > 1.15 ? Math.max(0, targetRight - FRAME_HALF) : 0;
   camera.position.set(0, 1.25, aspect > 1.15 ? 5.5 : 7.2);
   camera.lookAt(0, 0.8, 0.4);
   camera.aspect = aspect;
@@ -240,19 +261,6 @@ layout();
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const TIME_SCALE = 0.25; // та сама «спокійна» швидкість, що затверджена для поточного фону
-
-// СКРОЛ-ПАРАЛЛАКС (побажання 2026-09-10): сторінка скролиться вертикально, а сцена
-// уходить ВПРАВО за межі кадру і повертається справа при зворотному скролі — без
-// вертикального зсуву (фон не «пролистується в гору», монітор не пливе вгору від тексту).
-// Увага: використовується world.position.x = baseX + scrollX, де baseX рахує layout()
-// — тому при resize і в щоразовому renderFrame беремо актуальний baseX з layout().
-let baseX = 0; // актуальний базовий зсув (пише layout())
-let scrollX = 0; // поточний паралакс-зсув
-const SCROLL_SPAN = Math.max(window.innerWidth * 0.35, 220); // крок уходу за 1 екран скролу
-
-function applyScrollX() {
-  world.position.x = baseX + scrollX;
-}
 
 window.addEventListener("scroll", () => {
   if (reducedMotion) return;
