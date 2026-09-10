@@ -57,4 +57,4 @@
 - [ ] вихід за межі етапу = початок роботи над мовними копіями / HTTPS / og:image.
 - [x] India market experiment опубліковано на `in.biosunlocktool.com`; старий alias і код/дослідницьке обґрунтування зафіксовані в `docs/india-theme-research.md`.
 - [x] Poland market experiment опубліковано в `locales/pl-PL/` з окремою атмосферою та польським UI; production smoke на `pl.biosunlocktool.com` пройдено для redirect, мови, акценту, canonical і overflow.
-- [x] Germany market experiment підготовлено в `locales/de-DE/` з окремою атмосферою та німецьким UI; перед релізом потрібен production smoke на `de.biosunlocktool.com`.
+- [x] Germany market experiment опубліковано в `locales/de-DE/` з окремою атмосферою та німецьким UI; production smoke на `de.biosunlocktool.com` пройдено для redirect, мови, акценту, canonical і overflow.
