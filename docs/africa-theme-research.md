@@ -18,10 +18,10 @@
 
 - 8FC8 hero, monitor, product cards, buy-flow, anchors і accessibility не змінюються;
 - canonical та `og:url` лишаються `https://biosunlocktool.com/`;
-- `af.biosunlocktool.com` маршрутизується на `/locales/af-ZA/`;
+- `af.biosunlocktool.com/` внутрішньо обслуговує `/locales/af-ZA/`, але не показує цей каталог у браузері;
 - `prefers-reduced-motion` вимикає дві нові фонові анімації;
 - mobile не вимагає WebGL і зберігає той самий фон через CSS.
 
 ## Критерій перевірки
 
-На staging і production перевіряються redirect, `lang="en-ZA"`, `data-market="africa"`, ochre `--accent`, CSS stamp `20260910x`, відсутність horizontal overflow, читабельність скла та робочі якорі. Якщо реакція ринку буде слабкою, тему можна прибрати одним CSS override без зміни структури сторінки.
+На staging і production перевіряються clean root URL, `lang="en-ZA"`, `data-market="africa"`, ochre `--accent`, CSS stamp `20260910x`, відсутність horizontal overflow, читабельність скла та робочі якорі. Якщо реакція ринку буде слабкою, тему можна прибрати одним CSS override без зміни структури сторінки.
