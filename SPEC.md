@@ -14,11 +14,12 @@
 - motion layer: `scroll-progress` і reveal-анімації карток/кроків/гайдів використовують native CSS Scroll-Driven Animations, а старі браузери — IntersectionObserver fallback; reduced-motion залишає контент видимим і статичним;
 - India market: канонічний короткий host `in.biosunlocktool.com` (старий `india.biosunlocktool.com` лишається compatibility alias) використовує той самий English canonical landing, але host-aware `data-market="india"` вмикає окрему абстрактну атмосферу з indigo/navy, saffron і dark green; US apex та невідомі host-и лишаються без цього override;
 - Poland market: `pl.biosunlocktool.com` редіректиться на локальну повну копію `locales/pl-PL/`, яка зберігає 8FC8-структуру та купівельний шлях, але перекладає основний UI польською і вмикає радикально іншу host-aware атмосферу `data-market="poland"` — графіт, теплий паперовий відтінок, кармінне світло й тонку діагональну фактуру;
+- Germany market: `de.biosunlocktool.com` редіректиться на локальну повну копію `locales/de-DE/`, яка перекладає основний UI німецькою і вмикає `data-market="germany"` — steel-blue інженерне поле, amber-сигнал і креслярську сітку з контрольованим червоним діагональним маркером;
 - зафіксовано `$impeccable critique`: 25/36 за 9 застосовними евристиками, без P0, чотири P1 для наступної ітерації; контраст і overflow перевірені браузером;
 - NAS `http://nlmhelp.keenetic.link:18080/` — staging із bind-mount (зміна файлу видима одразу); короткі market-host-и `us.nlmhelp.keenetic.link:18080`, `ca.nlmhelp.keenetic.link:18080`, `in.nlmhelp.keenetic.link:18080`, `de.nlmhelp.keenetic.link:18080`, `pl.nlmhelp.keenetic.link:18080`, `af.nlmhelp.keenetic.link:18080` використовують той самий порт; production оновлюється окремим sync → Cloudflare deploy циклом;
 - canonical/og:url, favicon, selected-plan sync і чесний PayPal coming-soon стан перевірені на production після Action `2f69c19`.
 
-**Що змінюємо:** у поточній ітерації стабілізуємо візуальний фон на mobile/desktop: зберігаємо ПК-wow-ефект на широких екранах, прибираємо строкатий procedural noise і даємо mobile той самий легкий анімований CSS-градієнт; остання корекція користувача — приблизно вдвічі темніша палітра без затемнення ПК. Окрема India-ітерація додає host-aware атмосферу, а Poland-ітерація — повну польську UI-копію з радикально іншим графітово-кармінним фоном для чесного культурного порівняння. У цій ітерації також зафіксовані canonical/og:url, monitor-with-code favicon, data-pick → pay-row sync, sticky-anchor правила, PRODUCT.md і nexxgsm-workflow skill.
+**Що змінюємо:** у поточній ітерації стабілізуємо візуальний фон на mobile/desktop: зберігаємо ПК-wow-ефект на широких екранах, прибираємо строкатий procedural noise і даємо mobile той самий легкий анімований CSS-градієнт; остання корекція користувача — приблизно вдвічі темніша палітра без затемнення ПК. Окремі India, Poland і Germany ітерації додають host-aware атмосфери та повні локальні UI-копії без зміни конверсійного сценарію. У цій ітерації також зафіксовані canonical/og:url, monitor-with-code favicon, data-pick → pay-row sync, sticky-anchor правила, PRODUCT.md і nexxgsm-workflow skill.
 
 **Що не змінюємо:** структуру `versions/en-US-landing/`; bind-mount деплой на NAS (не перетворювати на copied image); зайняті публічні порти 18080/18082/18083/18084/18085/18088/18090/18091; правило форвардингу `nexxgsm-landing` на зовнішньому Keenetic; **не прибирати NAS-деплой** — це тестовий поверх перед кожним релізом у прод; не перебазовувати git-remote у `vaoferi/biosunlocktool` без окремої команди. Admin→frontend даних немає — контент редагується прямо у файлах версії.
 
@@ -44,7 +45,8 @@
 - регресії: `node testing/quick-test.js` (overflow-свуп; очікує сервер на :8080 з `versions/`);
 - текстові файли: UTF-8 без BOM, скан на mojibake (Рџ/РЅ/�).
 - India smoke: у браузері `in.biosunlocktool.com` має `data-market="india"`, saffron `--accent`, завантажений `main.css?v=20260910u`, чисту консоль і canonical `https://biosunlocktool.com/`; apex має `data-market="us"`.
-- Poland smoke: у браузері `pl.biosunlocktool.com` після 308 має `lang="pl-PL"`, `data-market="poland"`, кармінний `--accent`, CSS `main.css?v=20260910v`, польські hero/products/steps і чисту консоль; на staging `pl.nlmhelp.keenetic.link:18080` перевіряється саме host-aware фон.
+- Poland smoke: у браузері `pl.biosunlocktool.com` після 308 має `lang="pl-PL"`, `data-market="poland"`, кармінний `--accent`, CSS `main.css?v=20260910w`, польські hero/products/steps і чисту консоль; на staging `pl.nlmhelp.keenetic.link:18080` перевіряється саме host-aware фон.
+- Germany smoke: у браузері `de.biosunlocktool.com` після 308 має `lang="de-DE"`, `data-market="germany"`, amber `--accent`, CSS `main.css?v=20260910w`, німецькі hero/products/steps і чисту консоль; на staging `de.nlmhelp.keenetic.link:18080` перевіряється саме host-aware фон.
 - NAS host smoke: `in.nlmhelp.keenetic.link:18080` має `data-market="india"`, а root/`us`/`ca`/`de`/`pl`/`af` на тому самому порту мають US baseline.
 
 **Критерії готовності поточного етапу (виконані):**
@@ -55,3 +57,4 @@
 - [ ] вихід за межі етапу = початок роботи над мовними копіями / HTTPS / og:image.
 - [x] India market experiment опубліковано на `in.biosunlocktool.com`; старий alias і код/дослідницьке обґрунтування зафіксовані в `docs/india-theme-research.md`.
 - [x] Poland market experiment опубліковано в `locales/pl-PL/` з окремою атмосферою та польським UI; production smoke на `pl.biosunlocktool.com` пройдено для redirect, мови, акценту, canonical і overflow.
+- [x] Germany market experiment підготовлено в `locales/de-DE/` з окремою атмосферою та німецьким UI; перед релізом потрібен production smoke на `de.biosunlocktool.com`.

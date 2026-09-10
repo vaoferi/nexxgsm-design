@@ -172,7 +172,7 @@ Firefox, reduced-motion і без JavaScript.
 - `nexxgsm-design/README.md` — розділ «Production (remote NAS)», інструкція відтворення.
 - Контейнер `nexxgsm-landing` на NAS; правило `ip static` 18080 на зовнішньому Keenetic (index `ca82df028405342ed0d67ab7e04a75bb`).
 - Джерело контенту: `/volume1/homes/vaoferi/Work/8fc8/nexxgsm-design/versions/en-US-landing/` = `/Volumes/Work/8fc8/nexxgsm-design/versions/en-US-landing/`.
-- Host-aware CSS читає `window.location.hostname`: `in.nlmhelp.keenetic.link:18080` отримує India-атмосферу, `pl.nlmhelp.keenetic.link:18080` — Poland-атмосферу, а root/інші market-host-и залишаються US baseline до окремого design pass. Staging не маршрутизує окрему мовну папку; повний польський UI живе в CF-маршруті `/locales/pl-PL/`.
+- Host-aware CSS читає `window.location.hostname`: `in.nlmhelp.keenetic.link:18080` отримує India-атмосферу, `pl.nlmhelp.keenetic.link:18080` — Poland-атмосферу, `de.nlmhelp.keenetic.link:18080` — Germany-атмосферу, а root/інші market-host-и залишаються US baseline до окремого design pass. Staging не маршрутизує мовні папки; повні Polish/German UI живуть у CF-маршрутах `/locales/pl-PL/` і `/locales/de-DE/`.
 
 ### Відкриті питання (не блокують)
 

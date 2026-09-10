@@ -27,7 +27,7 @@ The landing combines a short product choice, Dell-specific password triage, and 
 ## Operating Context
 
 - Canonical source: `versions/en-US-landing/` in this repository.
-- Staging/test surface: `http://nlmhelp.keenetic.link:18080/`, served from the Synology bind mount. Short market hosts are also available on the same port: `us.`, `ca.`, `in.`, `de.`, `pl.`, `af.` + `nlmhelp.keenetic.link`; `in` enables the India theme and `pl` enables the Poland atmosphere for the shared canonical copy.
+- Staging/test surface: `http://nlmhelp.keenetic.link:18080/`, served from the Synology bind mount. Short market hosts are also available on the same port: `us.`, `ca.`, `in.`, `de.`, `pl.`, `af.` + `nlmhelp.keenetic.link`; `in`, `pl` and `de` enable the India, Poland and Germany atmospheres for the shared canonical copy.
 - Production surface: `https://biosunlocktool.com/` on Cloudflare Pages; the NAS staging surface must be checked before a production release.
 - The workflow is static-file editing → NAS browser verification → canonical sync to `vaoferi/biosunlocktool` → Cloudflare build/deploy → production smoke test.
 
@@ -38,6 +38,7 @@ The landing combines a short product choice, Dell-specific password triage, and 
 - Telegram is the available live handoff; the PayPal button currently exposes an inline “coming soon” state rather than pretending checkout is live.
 - Eight Dell BIOS guides and FAQPage structured data explain password types, code suffixes, privacy, and recovery limits.
 - Polish production preserves the same information architecture and product promises while translating the primary conversion UI; its background is intentionally a separate cultural experiment, not a literal flag treatment.
+- German production preserves the same information architecture and product promises while translating the primary conversion UI; its background uses a distinct engineering-blueprint direction rather than a literal flag treatment.
 - Desktop/wide screens may use a transparent Three.js monitor-and-keyboard scene; mobile must retain a visual effect without depending on WebGL.
 - No secrets, customer identifiers, full device codes, or invented testimonials may be added to the public page.
 - Static content is edited in files; there is no admin-to-frontend CMS data flow in this project.
