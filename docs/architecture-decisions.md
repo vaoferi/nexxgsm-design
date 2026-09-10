@@ -124,7 +124,7 @@ Firefox, reduced-motion і без JavaScript.
 
 Міграція виконана і запушена в `vaoferi/biosunlocktool` (коміт `c55b893`):
 
-- **Схема підтверджена реальністю:** апекс `biosunlocktool.com` обслуговує канон en-US напряму з **кореня** репо (не з `us.`); субдомени `in./de./pl./af.` → `/locales/<locale>/` (308-редірект через `functions/_middleware.ts`); www — як апекс.
+- **Схема підтверджена реальністю:** апекс `biosunlocktool.com` обслуговує канон en-US напряму з **кореня** репо (не з `us.`); субдомени `de./pl./af.` → `/locales/<locale>/` (308-редірект через `functions/_middleware.ts`), а `in` навмисно лишається host-aware каноном без legacy `en-IN`; www — як апекс.
 - Канон продубльовано в CF-репо: корінь (`index.html` + `assets/`) і `locales/en-US/`. **Джерело істини лишається в `nexxgsm-design/versions/en-US-landing/`** — змінювати там і копіювати сюди, поки не ухвалено рішення про автосинхронізацію.
 - Виправлено зламаний скаффолд: `wrangler.toml` був Workers-конфігом (ломав `wrangler pages deploy`), корінь не мав `index.html` (апекс віддав би 404), middleware перезаписував шляхи на неіснуючі файли; зібрані `wrangler-pages.toml`/`cloudflare-pages.toml` видалено.
 - Деплой: GitHub Action `.github/workflows/deploy.yml` (push у `main`). Домени прикріплені і працюють (2026-09-09): **apex `biosunlocktool.com` = основний прод**, www — те саме; SSL Full (strict). Секрети `CF_ACCOUNT_ID`/`CF_API_TOKEN` задані в GitHub.
@@ -172,7 +172,7 @@ Firefox, reduced-motion і без JavaScript.
 - `nexxgsm-design/README.md` — розділ «Production (remote NAS)», інструкція відтворення.
 - Контейнер `nexxgsm-landing` на NAS; правило `ip static` 18080 на зовнішньому Keenetic (index `ca82df028405342ed0d67ab7e04a75bb`).
 - Джерело контенту: `/volume1/homes/vaoferi/Work/8fc8/nexxgsm-design/versions/en-US-landing/` = `/Volumes/Work/8fc8/nexxgsm-design/versions/en-US-landing/`.
-- Host-aware CSS читає `window.location.hostname`: `in.nlmhelp.keenetic.link:18080` отримує India-атмосферу, а root/інші market-host-и залишаються US baseline до окремого design pass.
+- Host-aware CSS читає `window.location.hostname`: `in.nlmhelp.keenetic.link:18080` отримує India-атмосферу, `pl.nlmhelp.keenetic.link:18080` — Poland-атмосферу, а root/інші market-host-и залишаються US baseline до окремого design pass. Staging не маршрутизує окрему мовну папку; повний польський UI живе в CF-маршруті `/locales/pl-PL/`.
 
 ### Відкриті питання (не блокують)
 
