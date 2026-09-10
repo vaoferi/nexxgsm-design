@@ -54,4 +54,4 @@
 - [x] інфраструктура і конвенції задокументовані (README, architecture-decisions);
 - [ ] вихід за межі етапу = початок роботи над мовними копіями / HTTPS / og:image.
 - [x] India market experiment опубліковано на `in.biosunlocktool.com`; старий alias і код/дослідницьке обґрунтування зафіксовані в `docs/india-theme-research.md`.
-- [x] Poland market experiment підготовлено в `locales/pl-PL/` з окремою атмосферою та польським UI; перед релізом потрібен production smoke на `pl.biosunlocktool.com`.
+- [x] Poland market experiment опубліковано в `locales/pl-PL/` з окремою атмосферою та польським UI; production smoke на `pl.biosunlocktool.com` пройдено для redirect, мови, акценту, canonical і overflow.
