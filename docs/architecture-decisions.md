@@ -39,6 +39,45 @@
 
 ---
 
+## Рішення: Scroll-driven motion як progressive enhancement
+
+**Дата:** 2026-09-10
+
+### Контекст
+
+Користувач попросив оживити картки та блоки, не повертаючи важкі scroll-event
+цикли або бібліотеки. Потрібно зберегти читабельну сторінку на mobile, Safari,
+Firefox, reduced-motion і без JavaScript.
+
+### Що вирішили
+
+- У каноні використовується переносимий skill `docs/skills/web-animation-patterns/`.
+- `scroll-progress` використовує native `animation-timeline: scroll(root)` там, де
+  це підтримується, і не створює layout space.
+- Product cards, steps і guides використовують `animation-timeline: view()` з
+  `animation-range: entry 0% cover 35%`; старі браузери отримують
+  `IntersectionObserver` fallback.
+- За `prefers-reduced-motion: reduce` progress приховується, а всі блоки
+  залишаються видимими без blur/transform/animation.
+- Hover/focus та SVG-рухи мають запускатися зі стабільного контейнера і не можуть
+  бути єдиним способом зрозуміти дію.
+
+### Що не можна ламати
+
+- Не ховати контент до завантаження JavaScript або підтримки timeline API.
+- Не додавати пер-піксельні `scroll` listeners, якщо задачу закриває CSS timeline
+  або IntersectionObserver.
+- Не анімувати layout-властивості (`width`, `height`, `top`, `left`) у великих
+  списках і не створювати horizontal touch rail без окремої вимоги.
+
+### Пов’язані файли
+
+- `docs/skills/web-animation-patterns/SKILL.md`
+- `versions/en-US-landing/assets/css/main.css`
+- `versions/en-US-landing/index.html`
+
+---
+
 ## Рішення: Продакшн платформа — Cloudflare Pages, домен biosunlocktool.com, монорепо vaoferi/biosunlocktool
 
 **Дата:** 2026-09-09

@@ -1,0 +1,17 @@
+{
+  "skill_name": "web-animation-patterns",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Зроби появу карток продуктів при прокрутці на статичному лендінгу так, щоб контент залишався доступним без JavaScript, підтримував prefers-reduced-motion і мав fallback для браузерів без animation-timeline.",
+      "expected_output": "CSS view-timeline progressive enhancement, IntersectionObserver fallback, static/reduced-motion state, no layout shift, browser QA checklist.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Додай hover/focus-анімацію до inline SVG іконки меню. Вона має працювати клавіатурою, не залежати від кольору, не смикатися під курсором і вимикатися при reduced motion.",
+      "expected_output": "Stable SVG container trigger, grouped paths/currentColor, equivalent focus-visible state, reduced-motion override, accessible static fallback.",
+      "files": []
+    }
+  ]
+}

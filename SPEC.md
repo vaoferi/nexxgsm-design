@@ -11,6 +11,7 @@
 **Поточний стан (що вже працює):**
 - канонічний лендінг: hero в один екран, WebGL-фон, сітка продуктів (заголовок окремо, картки в один ряд), бургер-меню ≤900px, акордеон з 8 статтями + 3 FAQ, scroll-spy, OG-мета;
 - фон: один CSS-градієнт у глибокій navy-палітрі американського прапора `linear-gradient(45deg, #0b2e55, #071d39, #01050d)` із 200% полотном та 12-секундною анімацією працює на всіх viewport; понад 700px прозора сцена додає монітор і клавіатуру поверх нього, а mobile не запускає WebGL;
+- motion layer: `scroll-progress` і reveal-анімації карток/кроків/гайдів використовують native CSS Scroll-Driven Animations, а старі браузери — IntersectionObserver fallback; reduced-motion залишає контент видимим і статичним;
 - зафіксовано `$impeccable critique`: 25/36 за 9 застосовними евристиками, без P0, чотири P1 для наступної ітерації; контраст і overflow перевірені браузером;
 - NAS `http://nlmhelp.keenetic.link:18080/` — staging із bind-mount (зміна файлу видима одразу); production оновлюється окремим sync → GitHub Action циклом;
 - canonical/og:url, favicon, selected-plan sync і чесний PayPal coming-soon стан перевірені на production після Action `2f69c19`.

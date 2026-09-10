@@ -29,6 +29,9 @@ Future language/culture copies (e.g. `en-IN-landing`, `ro-RO-landing`, ...) will
 │   ├── keywords-research.md  # SEO research + cultural adaptation guidelines
 │   └── wireframes/
 │
+├── docs/skills/              # Portable workflow and animation skills
+│   └── web-animation-patterns/ # CSS timelines + IO fallback + a11y rules
+│
 ├── AGENTS.md                 # Agent operating rules (workspace-wide)
 └── README.md
 ```
