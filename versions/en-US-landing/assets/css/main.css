@@ -71,7 +71,13 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 /* Тіні під текстом скла: hero-заголовок, заголовки секцій, eyebrow, картки продуктів,
    кроки, summary гайдів, buy-блок. М'яка широка тінь (не обведення) — текст читається
    поверх анімованого фону і скла без візуального «бруду». За побажанням (2026-09-09). */
-.title, .section-title, .eyebrow, .product h3, .product p, .step-item, .guide summary, .guide-body, .guide-body h3, .buy-card h2, .buy-card p, .site-footer {
+.title, .section-title, .eyebrow, .product h3, .product p, .step-item, .guide summary, .guide-body, .guide-body h3, .buy-card h2, .buy-card p, .site-footer,
+/* Мобільна перевірка 2026-09-10: хедер — теж скло, але був ЄДИНИМ скляним блоком
+   без text-shadow (пропуск у цьому пакеті). На 320–480px під хедером проходять
+   світлі піки фону: замір контрасту білого тексту крізь скло 0.45 = 2.16:1
+   (норма AA 4.5:1). Тінь не змінює затверджену прозорість 0.45 — вона
+   повертає контурну читабельність у найгіршому кадрі. */
+.header .logo-text .a, .header .logo-text .b, .header .nav-pill, .header .cta-text {
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
 }
 
@@ -243,9 +249,12 @@ html::before {
 
 /* Коробки літер. Співвідношення від D = --figd (база 92px):
    .char (коробка F/C): 1×1.7174D (92→158) | 8: висота = 2D (1:2 оригіналу)
-   F-стійка: left .326D top .174D w .348D h 1.370D | F-рамено: w .609D h .348D,
-   тінь .674D | C: left/top .087D, коробка .826D×1.543D.
-   НЕ міняти окремі calc-и «на око» — перерахуй від базових px (30/92=0.326 тощо). */
+   Вирівнювання ваги 2026-09-10 («підтягнути C, F до ваги 8»): перо F .348D→.40D
+   (висота 1.370D→1.46D), рамено .609D→.68D; C зовнішній еліпс .826×1.543D→.90×1.645D,
+   кільце 32→~38px. Вага на висоту: 8 = 0.785D, F = 0.77D, C = 0.56D + світлове плато.
+   F-стійка: left .295D top .14D w .40D h 1.46D | F-рамено: w .68D h .40D, тінь .72D
+   | C: left/top .05D, коробка .90D×1.645D, радіуси отвору 4.5%×25% (однакова товщина кільця ~38px).
+   НЕ міняти окремі calc-и «на око» — перерахуй від базових px (27/92=0.295 тощо). */
 .char { position: relative; width: var(--figd); height: calc(var(--figd) * 1.7174); flex-shrink: 0; }
 
 /* Вісімки — точна пропорція оригіналу 1:2 (architect-порт): контейнер = дві висоти
@@ -295,27 +304,29 @@ html::before {
    від --figd (див. таблицю біля .char): масштабується автоматично на всіх екранах. */
 .char-f::before {
   content: ''; position: absolute;
-  left: calc(var(--figd) * 0.326); top: calc(var(--figd) * 0.174);
-  width: calc(var(--figd) * 0.348); height: calc(var(--figd) * 1.370);
-  background: linear-gradient(var(--fig-light), var(--fig-dark));
+  left: calc(var(--figd) * 0.295); top: calc(var(--figd) * 0.14);
+  width: calc(var(--figd) * 0.40); height: calc(var(--figd) * 1.46);
+  /* Світлове плато 18%–92%: на товстому пері темний кінець домінував і знижував
+     середню яскравість проти дисків 8 — те саме перо, більше світла. */
+  background: linear-gradient(var(--fig-light) 18%, var(--fig-dark) 92%);
   border-radius: calc(var(--figd) * 0.087);
   animation: eightBreath 4s ease-in-out infinite reverse;
 }
 
 .char-f::after {
   content: ''; position: absolute;
-  left: calc(var(--figd) * 0.326); top: calc(var(--figd) * 0.174);
-  width: calc(var(--figd) * 0.609); height: calc(var(--figd) * 0.348);
-  background: linear-gradient(var(--fig-light), var(--fig-dark));
+  left: calc(var(--figd) * 0.295); top: calc(var(--figd) * 0.14);
+  width: calc(var(--figd) * 0.68); height: calc(var(--figd) * 0.40);
+  background: linear-gradient(var(--fig-light) 18%, var(--fig-dark) 92%);
   border-radius: calc(var(--figd) * 0.087);
-  box-shadow: 0 calc(var(--figd) * 0.674) 0 var(--fig-dark);
+  box-shadow: 0 calc(var(--figd) * 0.72) 0 var(--fig-dark);
   animation: eightBreath 4s ease-in-out infinite;
 }
 
 .char-c::before {
   content: ''; position: absolute;
-  left: calc(var(--figd) * 0.087); top: calc(var(--figd) * 0.087);
-  width: calc(var(--figd) * 0.826); height: calc(var(--figd) * 1.543);
+  left: calc(var(--figd) * 0.05); top: calc(var(--figd) * 0.05);
+  width: calc(var(--figd) * 0.90); height: calc(var(--figd) * 1.645);
   border-radius: 50%;
   /* C як жирна дуга: конус малює колір + клиновий рот праворуч (0° = вгору,
      90° = праворуч; рот 64–116°), радіальна маска вибирає отвір.
@@ -324,15 +335,15 @@ html::before {
      радіуси 7.9% × 27.5%. Колись записали розміри як радіуси (52.6%/73.2%) —
      отвір став 80×208, більший за фігуру, і C ПОВНІСТЮ зникла з продакшну.
      Перевірка: радіус ≤ 50% відповідної сторони коробки.
-     Товщина кільця 32px = стійка F (вибір користувача «жирна як F»).
+     Кільце ~38px = стійка F .40D (пара тримається разом; вирівнювання ваги 2026-09-10).
      Якщо міняєш кути рота або маску — дивись фігуру наживо на проді. */
   background: conic-gradient(from 0deg,
-    var(--fig-dark) 0deg, var(--fig-light) 62deg,
+    var(--fig-dark) 0deg, var(--fig-light) 58deg,
     transparent 64deg 116deg,
-    var(--fig-light) 118deg, var(--fig-dark) 300deg,
-    var(--fig-light) 356deg, var(--fig-dark) 360deg);
-  mask-image: radial-gradient(ellipse 7.9% 27.5% at 50% 50%, transparent 97%, black 100%);
-  -webkit-mask-image: radial-gradient(ellipse 7.9% 27.5% at 50% 50%, transparent 97%, black 100%);
+    var(--fig-light) 118deg, var(--fig-dark) 316deg,
+    var(--fig-light) 358deg, var(--fig-dark) 360deg);
+  mask-image: radial-gradient(ellipse 4.5% 25% at 50% 50%, transparent 97%, black 100%);
+  -webkit-mask-image: radial-gradient(ellipse 4.5% 25% at 50% 50%, transparent 97%, black 100%);
   animation: eightBreath 4s ease-in-out infinite;
 }
 

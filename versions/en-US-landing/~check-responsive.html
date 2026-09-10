@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en-US"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RESPONSIVE CHECK 320/390/768/1280 — TEMP, NAS-only</title>
+<!-- Тимчасова перевірка (2026-09-10): 4 same-origin iframes з розмірами реальних пристроїв.
+     ВИДАЛИТИ ЦЕЙ ФАЙЛ ПІСЛЯ ПЕРЕВІРКИ. У CF-репо не синхронізувати. -->
+<style>
+  body{margin:0;background:#111;color:#eee;font:13px monospace;padding:10px}
+  .row{margin-bottom:14px}
+  .row h2{font-size:13px;margin:0 0 4px;color:#8cf}
+  .frame{border:2px solid #444;background:#000;overflow:hidden}
+</style></head>
+<body>
+<div class="row"><h2>320×568 (small phone)</h2><div class="frame" id="f320"><iframe id="i320" style="border:0" width="320" height="568"></iframe></div></div>
+<div class="row"><h2>390×844 (iPhone 14)</h2><div class="frame" id="f390"><iframe id="i390" style="border:0" width="390" height="844"></iframe></div></div>
+<div class="row"><h2>768×1024 (tablet portrait)</h2><div class="frame" id="f768"><iframe id="i768" style="border:0" width="768" height="1024"></iframe></div></div>
+<div class="row"><h2>1280×800 (desktop)</h2><div class="frame" id="f1280"><iframe id="i1280" style="border:0" width="1280" height="800"></iframe></div></div>
+<script>
+  ['320','390','768','1280'].forEach(function(w){
+    document.getElementById('i'+w).src = '/?rc='+w;
+  });
+</script>
+</body></html>
