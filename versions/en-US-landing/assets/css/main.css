@@ -90,9 +90,9 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 html::before {
   content: '';
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  /* Остання корекція користувача: ще трохи темніше, з додатковим середнім
-     синім стопом; ПК лишається без змін. */
-  background: linear-gradient(45deg, #0d3f67 0%, #082b47 50%, #010508 100%);
+  /* Глибокий navy у дусі синього поля американського прапора: трохи
+     темніший за попередню палітру, але все ще достатньо синій для атмосфери. */
+  background: linear-gradient(45deg, #0b2e55 0%, #071d39 50%, #01050d 100%);
   background-size: 200% 200%;
   animation: pageGradient 12s ease infinite;
 }
