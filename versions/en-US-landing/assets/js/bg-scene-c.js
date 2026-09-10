@@ -1,25 +1,26 @@
 import * as THREE from "./vendor/three.module.min.js?v=20260909c";
 
-// ДЕМО-ВАРІАНТ C фону: та сама сцена «монітор + клавіатура», що у варіанті B (bg-scene.js),
-// але з дрібними деталями з оригінального пена (OPRBwOd): bloom-гало, блиски клавіш,
-// контактна тінь під монітором. NAS-ONLY демо для вибору варіанта: НЕ синхронізувати
-// в CF-репо; перед релізом у прод — ВИДАЛИТИ разом з bg-demo-c.html, якщо варіант C
-// відхилено. Канонічний index.html цей файл не підключає.
+// КАНОНІЧНИЙ ФОН САЙТУ (2026-09-10, вибір користувача): варіант C — сцена
+// «монітор + клавіатура» з дрібними деталями з пена (OPRBwOd): bloom-гало, блиски
+// клавіш, контактна тінь. Підключається з `index.html` (канон), а також із
+// `bg-demo-c.html` (демо для порівняння).
 //
-// SAFARI-СУМІСНІСТЬ (головне правило цього файла): жодних EffectComposer / UnrealBloom /
-// OutputPass / рендер-таргетів / spotlight.map — ця трійка вже ламала сторінку в WebKit
-// (GL_INVALID_OPERATION, див. коментар у background.js). Усі «дорогі» ефекти пена тут
-// імітовані дешевими примітивами, які працюють і в WebGL1 Safari:
-//   - bloom        → адитивні halo-квади з радіальним затуханням (перед екраном + за монітором);
-//   - блиски клавіш → ОДИН merged-mesh на всі 30 клавіш (1 draw call) з per-key фазою;
-//   - тінь         → класична fake contact shadow (м'який радіальний градієнт), без shadow maps.
+// SAFARI-СУМІСНІСТЬ (головне правило): жодних EffectComposer / UnrealBloom / OutputPass
+// / рендер-таргетів / spotlight.map — ця трійка вже ламала сторінку в WebKit
+// (GL_INVALID_OPERATION). Усі «дорогі» ефекти пена імітовані дешевими примітивами:
+//   - bloom     → адитивні halo-квади з радіальним затуханням (перед екраном + за монітором);
+//   - блиски    → ОДИН merged-mesh на всі 44 клавіші (1 draw call) з per-key фазою;
+//   - тінь      → класична fake contact shadow (м'який радіальний градієнт), без shadow maps.
+// Не повертати EffectComposer/UnrealBloom назад — спочатку Safari-перевірка.
 //
-// Доробка 2026-09-10 (зауваження користувача): у варіанті C була відсутня ПІДСТАВКА
-// монітора — екран тримався на самій стійці, сцена читалась як «пливучий монітор».
-// Перенесено трапецієвидну ніжку з варіанта B (вона ж — форма з пена) і підсвітку
-// клавіш кольором екрана; контактна тінь підведена під нову ніжку.
+// Доробка 2026-09-10: додано трапецієвидну підставку монітора (була відсутня — сцена
+// читалась як «пливучий монітор»), портовано scroll-паралакс вправо та паузу рендеру
+// при прокрутці hero за межі екрана (як у background.js), додано screenGlow — теплий
+// point light над клавіатурою, колір синхронізовано з палітрою екрана (клавіші
+// «підсвічені екраном», як у пена).
 
-const app = document.getElementById("bg-scene");
+// Канонічна сторінка використовує контейнер #bg-three; демо — #bg-scene. Приймаємо обидва.
+const app = document.getElementById("bg-scene") || document.getElementById("bg-three");
 const fallback = document.getElementById("bg-fallback");
 
 const testCanvas = document.createElement("canvas");
@@ -359,6 +360,21 @@ const keyLight = new THREE.PointLight(0xbfd4ff, 6, 9, 2);
 keyLight.position.set(0.4, 2.4, 2.6);
 scene.add(keyLight);
 
+// screenGlow (2026-09-10): теплий point light низько над клавіатурою, колір синхронізовано
+// з палітрою екрана — клавіші «підсвічені екраном», як у пена. Без цього клавіатура читалась
+// глухою темною плямою. Дешево: одна lerpColors на кадр замість шейдера.
+const screenGlow = new THREE.PointLight(0xffb08a, 14, 7, 2);
+screenGlow.position.set(0, 0.75, 0.9);
+scene.add(screenGlow);
+const glowA = new THREE.Color(0xffb08a);
+const glowB = new THREE.Color(0x8ab4ff);
+const glowCur = new THREE.Color();
+function syncGlow(tSec) {
+  const m = 0.5 + 0.5 * Math.sin(6.28318 * 0.42 + tSec * 6.28318 * 0.065);
+  glowCur.copy(glowA).lerp(glowB, m);
+  screenGlow.color.copy(glowCur);
+}
+
 function layout() {
   const aspect = window.innerWidth / window.innerHeight;
   // Притиснути правий край монітора до правого краю кадру — та сама формула, що у B.
@@ -381,21 +397,43 @@ const TIME_SCALE = 0.25; // та сама «спокійна» швидкіст�
 
 function renderFrame(tSec) {
   for (const m of timeMats) m.uniforms.uTime.value = tSec;
+  syncGlow(tSec);
   renderer.render(scene, camera);
 }
 renderFrame(0);
 
 let rafId = null;
+function setRunning(run) {
+  if (run && rafId === null) {
+    rafId = requestAnimationFrame(animate);
+  } else if (!run && rafId !== null) {
+    cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+}
 function animate() {
   rafId = requestAnimationFrame(animate);
   renderFrame(performance.now() * 0.001 * TIME_SCALE);
 }
 if (!reducedMotion) {
+  let offscreenCount = 0;
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden && rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
-    else if (!document.hidden && rafId === null) { rafId = requestAnimationFrame(animate); }
+    setRunning(!document.hidden && offscreenCount === 0);
   });
-  rafId = requestAnimationFrame(animate);
+  // Пауза, коли hero прокручений за межі екрана: фон перекритий скляними секціями,
+  // кадри марні (економія батареї/фпс на телефонах). Сцена сама по собі статична
+  // відносно скролу — це НЕ паралакс, а лише зупинка рендеру.
+  const hero = document.querySelector(".hero");
+  if (hero && "IntersectionObserver" in window) {
+    new IntersectionObserver(
+      (entries) => {
+        offscreenCount = entries[0].isIntersecting ? 0 : 1;
+        setRunning(!document.hidden && offscreenCount === 0);
+      },
+      { threshold: 0.05 }
+    ).observe(hero);
+  }
+  setRunning(true);
 }
 
 window.addEventListener("resize", () => {

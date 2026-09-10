@@ -477,16 +477,12 @@
     </footer>
   </div>
 
-  <!-- Слабкі мережі: three.js вендорений локально (three@0.166.1, офіційна min-збірка, MIT).
-       Раніше тягнувся з unpkg: третій-сторонній CDN = мінлива латентність на 3G і глухий фон,
-       коли CDN повільний/недоступний. addons не використовуються (мінімальний пайплайн).
-       Оновлювати вручну разом із перевіркою фону в Safari (див. background.js). -->
-  <!-- preload фону: головний скрипт починає завантаження одразу, не чекаючи CSS+парсинг,
-       перший кадр фону з'являється раніше на слабких пристроях. -->
-  <link rel="preload" as="script" href="assets/js/vendor/three.module.min.js?v=20260909c">
-  <script type="module" src="assets/js/background.js?v=20260909c"></script>
-  <!-- Немає modulepreload для vendor/three.module.min.js: import у background.js і так
-       стартує одразу при парсингу; через місцевий шлях резолвиться так само швидко. -->
+  <!-- Канонічний фон: сцена «монітор + клавіатура» (варіант C, 2026-09-10).
+       Сцена статична відносно скролу; рендер зупиняється, коли hero прокручений за
+       межі екрана (економія батареї). Safari-сумісно: жодних EffectComposer/UnrealBloom.
+       Деталі — коментарі на початку bg-scene-c.js. -->
+  <link rel="preload" as="script" href="assets/js/vendor/three.module.min.js?v=20260910c">
+  <script type="module" src="assets/js/bg-scene-c.js?v=20260910c"></script>
 
   <script>
     // Бургер-меню: кнопка керує aria-expanded, панель ховається класом .open.
