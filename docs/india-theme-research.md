@@ -28,6 +28,8 @@ colors as abstract visual cues only and does not reproduce the flag or Chakra.
 ## Implementation boundary
 
 `window.location.hostname` sets `html[data-market]` before the stylesheet is
-parsed. Unknown hosts, the apex, `www`, and the NAS staging host remain `us`.
+parsed. The canonical market host is `in.biosunlocktool.com`; the earlier
+`india.biosunlocktool.com` name remains a compatibility alias during migration.
+Unknown hosts, the apex, `www`, and the NAS staging host remain `us`.
 The India theme is CSS-only after that marker and respects
 `prefers-reduced-motion`.
