@@ -79,7 +79,7 @@
 
 - `README.md` — розділ Production (оновлено), план мовних копій.
 - `SPEC.md` — ціль, ризики, план (оновлено 2026-09-09).
-- `versions/en-US-landing/index.html` — майбутні canonical/og:url на biosunlocktool.com (щойно схема субдоменів підтверджена).
+- `versions/en-US-landing/index.html` — canonical/og:url уже прошиті на `https://biosunlocktool.com/`; перед sync перевіряти обидва абсолютні URL.
 
 ### Виконання (оновлено 2026-09-09)
 
