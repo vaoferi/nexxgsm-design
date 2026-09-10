@@ -46,8 +46,8 @@
 - регресії: `node testing/quick-test.js` (overflow-свуп; очікує сервер на :8080 з `versions/`);
 - текстові файли: UTF-8 без BOM, скан на mojibake (Рџ/РЅ/�).
 - India smoke: у браузері `in.biosunlocktool.com` має `data-market="india"`, saffron `--accent`, завантажений `main.css?v=20260910u`, чисту консоль і canonical `https://biosunlocktool.com/`; apex має `data-market="us"`.
-- Poland smoke: у браузері `pl.biosunlocktool.com` після 308 має `lang="pl-PL"`, `data-market="poland"`, кармінний `--accent`, CSS `main.css?v=20260910w`, польські hero/products/steps і чисту консоль; на staging `pl.nlmhelp.keenetic.link:18080` перевіряється саме host-aware фон.
-- Germany smoke: у браузері `de.biosunlocktool.com` після 308 має `lang="de-DE"`, `data-market="germany"`, amber `--accent`, CSS `main.css?v=20260910w`, німецькі hero/products/steps і чисту консоль; на staging `de.nlmhelp.keenetic.link:18080` перевіряється саме host-aware фон.
+- Poland smoke: у браузері `pl.biosunlocktool.com` після 308 має `lang="pl-PL"`, `data-market="poland"`, кармінний `--accent`, CSS `main.css?v=20260910x`, польські hero/products/steps і чисту консоль; на staging `pl.nlmhelp.keenetic.link:18080` перевіряється саме host-aware фон.
+- Germany smoke: у браузері `de.biosunlocktool.com` після 308 має `lang="de-DE"`, `data-market="germany"`, amber `--accent`, CSS `main.css?v=20260910x`, німецькі hero/products/steps і чисту консоль; на staging `de.nlmhelp.keenetic.link:18080` перевіряється саме host-aware фон.
 - Africa smoke: у браузері `af.biosunlocktool.com` після 308 має `lang="en-ZA"`, `data-market="africa"`, ochre `--accent`, CSS `main.css?v=20260910x`, Africa hero/trust copy і чисту консоль; на staging `af.nlmhelp.keenetic.link:18080` перевіряється саме indigo/terracotta host-aware фон.
 - NAS host smoke: `in.nlmhelp.keenetic.link:18080` має `data-market="india"`, `af.nlmhelp.keenetic.link:18080` — `data-market="africa"`, а root/`us`/`ca`/`de`/`pl` на тому самому порту мають US baseline.
 
@@ -60,4 +60,4 @@
 - [x] India market experiment опубліковано на `in.biosunlocktool.com`; старий alias і код/дослідницьке обґрунтування зафіксовані в `docs/india-theme-research.md`.
 - [x] Poland market experiment опубліковано в `locales/pl-PL/` з окремою атмосферою та польським UI; production smoke на `pl.biosunlocktool.com` пройдено для redirect, мови, акценту, canonical і overflow.
 - [x] Germany market experiment опубліковано в `locales/de-DE/` з окремою атмосферою та німецьким UI; production smoke на `de.biosunlocktool.com` пройдено для redirect, мови, акценту, canonical і overflow.
-- [ ] Africa market experiment опубліковано в `locales/af-ZA/` з окремою атмосферою та англійським UI; production smoke на `af.biosunlocktool.com` ще має пройти для redirect, мови, акценту, canonical і overflow.
+- [x] Africa market experiment опубліковано в `locales/af-ZA/` з окремою атмосферою та англійським UI; production smoke на `af.biosunlocktool.com` пройдено для redirect, мови, акценту, CSS stamp, canonical і overflow.
