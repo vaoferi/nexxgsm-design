@@ -45,7 +45,7 @@ The landing combines a short product choice, Dell-specific password triage, and 
 
 - Product/brand names: BIOS ZONE and NexxGSM Service Point S.R.L.
 - Canonical language: American English (`en-US`); future copies adapt copy, currency, contact channel, and tone without silently changing the canonical product truth.
-- User-approved canonical design decisions: dark blue animated gradient as one continuous page background; matte glass surfaces for header, hero copy, cards, CTA, guides, and footer; the monitor-with-code mark in the header/favicon; the 8FC8 hero figures; and the desktop monitor scene.
+- User-approved canonical design decisions: one continuous animated deep-navy page background (`#0b2e55 → #071d39 → #01050d`, inspired by the dark blue field of the American flag); matte glass surfaces for header, hero copy, cards, CTA, guides, and footer; the monitor-with-code mark in the header/favicon; the 8FC8 hero figures; and the desktop monitor scene.
 - The hero PC starts about `3rem` to the right of the hero-copy frame, moves right on page scroll, returns on reverse scroll, and is kept approximately 7% smaller than the earlier wide composition.
 - Hero copy remains readable on the animated background through the same translucent treatment as the Telegram button; the PC itself is not darkened when the page background is adjusted.
 - The 8 figures use a restrained breathing range around 15%→20%; motion must stop under `prefers-reduced-motion`.
