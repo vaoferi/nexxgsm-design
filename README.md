@@ -17,7 +17,7 @@ Future language/culture copies (e.g. `en-IN-landing`, `ro-RO-landing`, ...) will
 │       ├── index.html
 │       └── assets/
 │           ├── css/          # main.css — layout, accordion, FAQ, dark theme
-│           └── js/           # background.js — Three.js WebGL hero
+│           └── js/           # bg-scene-c.js — wide 3D hero; CSS gradient serves mobile
 │
 ├── testing/                  # Visual regression tests
 │   ├── backstop.json         # BackstopJS scenarios
@@ -57,6 +57,9 @@ node quick-test.js
 
 # Full responsive audit (opens local files directly)
 node test-responsive.js
+
+# Page-gutter regression (requires the same :8080 server)
+node layout-gutter.js
 ```
 
 ## Dev preview

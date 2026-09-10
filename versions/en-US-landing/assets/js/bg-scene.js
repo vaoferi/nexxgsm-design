@@ -231,9 +231,13 @@ function syncGlow(tSec) {
 // вертикального зсуву (фон не «пролистується в гору», монітор не пливе вгору від тексту).
 // Оголошення ПЕРЕД layout() (2026-09-10): layout() писав у baseX до його ініціалізації —
 // ReferenceError (TDZ), сцена взагалі не рендерилась. Піднято сюди.
+// Також (2026-09-10): px→world конвертація. Раніше SCROLL_SPAN у пікселях додавався
+// напряму до world.position.x — на 1440x900 ПК зникав за перший піксель скролу. Тепер
+// pxToWorld = 2*halfW / innerWidth (рахує layout()).
 let baseX = 0; // актуальний базовий зсув (пише layout())
 let scrollX = 0; // поточний паралакс-зсув
-const SCROLL_SPAN = Math.max(window.innerWidth * 0.35, 220); // крок уходу за 1 екран скролу
+let pxToWorld = 0.005;
+const SCROLL_SPAN = Math.max(window.innerWidth * 0.35, 220); // крок уходу за 1 екран скролу (px)
 
 function applyScrollX() {
   world.position.x = baseX + scrollX;
@@ -249,6 +253,7 @@ function layout() {
   const FRAME_HALF = 1.08;
   const EDGE_MARGIN = 0.04;
   const halfW = Math.tan((camera.fov * Math.PI) / 360) * 5.0 * aspect;
+  pxToWorld = (2 * halfW) / Math.max(1, window.innerWidth);
   const targetRight = halfW * (1 - EDGE_MARGIN);
   world.position.x = aspect > 1.15 ? Math.max(0, targetRight - FRAME_HALF) : 0;
   camera.position.set(0, 1.25, aspect > 1.15 ? 5.5 : 7.2);
@@ -267,7 +272,7 @@ window.addEventListener("scroll", () => {
   const y = window.scrollY || 0;
   const vh = window.innerHeight || 1;
   const p = Math.min(1, y / vh); // 0 — верх, 1 — один екран проскролено
-  scrollX = p * SCROLL_SPAN;
+  scrollX = p * SCROLL_SPAN * pxToWorld;
   applyScrollX();
 }, { passive: true });
 

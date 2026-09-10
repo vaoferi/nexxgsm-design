@@ -33,7 +33,8 @@ if (!gl || !app) {
 
 let renderer;
 try {
-  renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "low-power" });
+  // Canvas прозорий: задній фон тепер живе в CSS, а 3D-ПК малюється поверх нього.
+  renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "low-power", alpha: true });
 } catch (e) {
   if (fallback) { fallback.style.display = "grid"; }
   throw e;
@@ -41,13 +42,16 @@ try {
 const MAX_DPR = 1.5;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_DPR));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x0a0a10, 1);
+renderer.setClearColor(0x000000, 0);
 app.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a0a10);
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
 const world = new THREE.Group();
+// Користувацька корекція 2026-09-10: desktop-ПК трохи компактніший, але його
+// прив'язка до hero-copy та scroll-паралакс мають залишатися тими самими.
+const SCENE_SCALE = 0.93;
+world.scale.setScalar(SCENE_SCALE);
 scene.add(world);
 
 // Спільний шум + палітра: ТОЙ САМИЙ fbm, що в варіанті B і поточному фоні (ідентичність 8fc8).
@@ -113,27 +117,6 @@ void main() {
   float highlight = pow(clamp((nA * 1.1 + ridge * 0.75) - 1.1, 0.0, 1.0), 2.2);
   col = mix(col, vec3(1.0, 0.96, 0.92), highlight * 0.18);
   gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
-}
-`;
-
-// ПІДЛОГА — варіант B + широке слабке гало (bloom) навколо світлової плями:
-// другий smoothstep набагато ширшого радіусу додає м'який підсвіт, немов bloom з пена.
-const FLOOR_FRAG = `
-precision highp float;
-varying vec3 vWorld;
-uniform float uTime;
-${NOISE}
-void main() {
-  float t = uTime;
-  vec2 sp = vWorld.xz * 0.55;
-  vec2 flow = vec2(t * 0.19, t * 0.13);
-  float n = 0.5 + 0.5 * fbm(sp * 2.2 + flow);
-  vec3 col = palette(n, t * 0.065);
-  float d = length((vWorld.xz - vec2(0.0, 0.9)) * vec2(1.0, 0.55));
-  float spill = smoothstep(3.2, 0.4, d);
-  float bloom = smoothstep(6.5, 0.0, d) * 0.16;
-  vec3 outc = mix(vec3(0.05, 0.05, 0.07), col * spill * 0.5, spill) + col * bloom;
-  gl_FragColor = vec4(outc, 1.0);
 }
 `;
 
@@ -213,16 +196,7 @@ void main() {
 const timeMats = [];
 function addTimed(mat) { timeMats.push(mat); return mat; }
 
-// Підлога
-const floorMat = addTimed(new THREE.ShaderMaterial({
-  vertexShader: WORLD_VERT, fragmentShader: FLOOR_FRAG,
-  uniforms: { uTime: { value: 0 } }, depthWrite: true,
-}));
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), floorMat);
-floor.rotation.x = -Math.PI / 2;
-world.add(floor);
-
-// Контактні тіні (прозорі, поверх підлоги; depthWrite вимкнено, щоб не конфліктували між собою)
+// Контактні тіні (прозорі, поверх CSS gradient; depthWrite вимкнено, щоб не конфліктували)
 const shadowMatMonitor = new THREE.ShaderMaterial({
   vertexShader: UV_VERT, fragmentShader: SHADOW_FRAG,
   uniforms: { uOpacity: { value: 0.5 } }, transparent: true, depthWrite: false,
@@ -375,29 +349,103 @@ function syncGlow(tSec) {
   screenGlow.color.copy(glowCur);
 }
 
+// СКРОЛ-ПАРАЛАКС ВПРАВО (2026-09-10, побажання користувача): на головному екрані
+// екран монітора стоїть у нижньому правому прямокутнику поруч із hero-текстом, при
+// скролі поступово виходить за правий край кадру і повертається при зворотному скролі.
+// Це НЕ вертикальний рух — фон не «пролистується вгору».
+// ВАЖЛИВО: scrollX у world.units. Раніше в B було px→world помилка (SCROLL_SPAN у px
+// додавався напряму до world.x — ПК зникав за один піксель скролу). Тут: переводимо
+// бажаний зсув у пікселях у world.units через pxToWorld = 2*halfW / innerWidth
+// (рахує layout(), бо залежить від FOV/аспекту/камери).
+let baseX = 0;
+let baseY = 0;
+let scrollX = 0;
+let pxToWorld = 0.005;
+let scrollSpanPx = 440;
+
+function applyScrollX() {
+  world.position.x = baseX + scrollX;
+  world.position.y = baseY;
+}
+
 function layout() {
   const aspect = window.innerWidth / window.innerHeight;
-  // Притиснути правий край монітора до правого краю кадру — та сама формула, що у B.
-  // Раніше було hardcoded world.x = 0.95 (довільне число, на 1440x900 монітор стояв майже
-  // по центру); тепер — frame.right = 0.96 * halfW незалежно від aspect.
+  // Якір композиції: екран має жити праворуч від рамки hero-тексту, а його верхній
+  // край починатися приблизно на рівні заголовка. Камера ближча (екран більший),
+  // сцена опущена; горизонтальний старт вирішується нижче через DOM-геометрію рамки.
+  // Не повертати розгалуження «на вузьких екранах сховати сцену»: фон має лишатися
+  // присутнім, а fallback вмикається лише коли WebGL/рендерер справді недоступний.
   const FRAME_HALF = 1.08;
-  const EDGE_MARGIN = 0.04;
-  const halfW = Math.tan((camera.fov * Math.PI) / 360) * 5.0 * aspect;
-  const targetRight = halfW * (1 - EDGE_MARGIN);
-  world.position.x = aspect > 1.15 ? Math.max(0, targetRight - FRAME_HALF) : 0;
-  camera.position.set(0, 1.25, aspect > 1.15 ? 5.5 : 7.2);
+  const FRAME_Y = 1.0;
+  const FRAME_Z = 0.42;
+  const EDGE_MARGIN = 0.05;
+  const CAMERA_Z = 5.3;
+  const TARGET_Y = -1.35;
+  const isWide = aspect >= 1.15;
+  const POSITION_X_SHIFT = isWide ? -0.20 : -0.14;
+  const POSITION_Y_SHIFT = isWide ? 0.12 : 0.09;
+  const halfW = Math.tan((camera.fov * Math.PI) / 360) * CAMERA_Z * aspect;
+  const halfH = Math.tan((camera.fov * Math.PI) / 360) * CAMERA_Z;
+  pxToWorld = (2 * halfW) / Math.max(1, window.innerWidth);
+  baseY = TARGET_Y + halfH * POSITION_Y_SHIFT * 2;
+  camera.position.set(0, 1.25, CAMERA_Z);
   camera.lookAt(0, 0.8, 0.4);
   camera.aspect = aspect;
   camera.updateProjectionMatrix();
+  camera.updateMatrixWorld(true);
+
+  // На канонічній сторінці якір береться з реальної рамки .hero-copy, а не з
+  // приблизного vw-зсуву. Тому стартова відстань між текстом і монітором завжди
+  // дорівнює 3rem; для NAS-only bg-demo без цієї рамки лишається старий fallback.
+  const copy = document.querySelector(".hero-copy");
+  const targetLeftPx = copy
+    ? copy.getBoundingClientRect().right + 3 * parseFloat(getComputedStyle(document.documentElement).fontSize || "16")
+    : null;
+  const projectFrameLeftPx = (x) => {
+    // world.scale впливає на локальну геометрію, але не на world.position;
+    // враховуємо це тут, щоб 3rem-відступ від hero-copy не змістився після resize.
+    const point = new THREE.Vector3(
+      x - FRAME_HALF * SCENE_SCALE,
+      FRAME_Y * SCENE_SCALE + baseY,
+      FRAME_Z * SCENE_SCALE,
+    );
+    point.project(camera);
+    return (point.x * 0.5 + 0.5) * window.innerWidth;
+  };
+  if (targetLeftPx !== null) {
+    const leftAtZero = projectFrameLeftPx(0);
+    const pxPerWorld = projectFrameLeftPx(1) - leftAtZero;
+    baseX = Math.abs(pxPerWorld) > 0.0001 ? (targetLeftPx - leftAtZero) / pxPerWorld : 0;
+  } else {
+    const targetRight = halfW * (1 - EDGE_MARGIN);
+    baseX = targetRight - FRAME_HALF * SCENE_SCALE + halfW * POSITION_X_SHIFT * 2;
+  }
+  scrollSpanPx = Math.max(window.innerWidth * 1.1, 440);
+  applyScrollX();
 }
 layout();
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const TIME_SCALE = 0.25; // та сама «спокійна» швидкість, що у варіанті B і затвердженому фоні
 
+// Скрол у пікселях → світові одиниці (pxToWorld рахує layout()): 1 екран скролу
+// зсуває сцену на ~35% ширини вікна, чого вистачає, щоб монітор повністю вийшов
+// за правий край і не вертикально «поплив» униз. На зворотному скролі повертається.
+window.addEventListener("scroll", () => {
+  const y = window.scrollY || 0;
+  const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+  const p = Math.min(1, y / maxScroll);
+  scrollX = p * scrollSpanPx * pxToWorld;
+  applyScrollX();
+  // IntersectionObserver ставить rAF на паузу, коли hero вже поза viewport.
+  // Один кадр на scroll все одно потрібен: саме він показує паралакс і зворотний рух.
+  renderFrame(reducedMotion ? 0 : performance.now() * 0.001 * TIME_SCALE);
+}, { passive: true });
+
 function renderFrame(tSec) {
   for (const m of timeMats) m.uniforms.uTime.value = tSec;
   syncGlow(tSec);
+  applyScrollX();
   renderer.render(scene, camera);
 }
 renderFrame(0);
@@ -443,12 +491,21 @@ window.addEventListener("resize", () => {
   renderFrame(reducedMotion ? 0 : performance.now() * 0.001 * TIME_SCALE);
 });
 
+// Шрифт може завантажитись уже після першого layout і змінити ширину .hero-copy.
+// Перерахунок після fonts.ready не дає монітору «плавати» відносно рамки після FOUT.
+if (document.fonts?.ready) {
+  document.fonts.ready.then(() => {
+    layout();
+    renderFrame(reducedMotion ? 0 : performance.now() * 0.001 * TIME_SCALE);
+  }).catch(() => {});
+}
+
 window.addEventListener("beforeunload", () => {
   if (rafId !== null) cancelAnimationFrame(rafId);
-  floorMat.dispose(); screenMat.dispose(); keyMat.dispose(); bodyMat.dispose();
+  screenMat.dispose(); keyMat.dispose(); bodyMat.dispose();
   glintMat.dispose(); haloFrontMat.dispose(); haloBackMat.dispose();
   shadowMatMonitor.dispose(); shadowMatKeys.dispose();
-  floor.geometry.dispose(); frame.geometry.dispose(); stand.geometry.dispose(); footGeo.dispose();
+  frame.geometry.dispose(); stand.geometry.dispose(); footGeo.dispose();
   screen.geometry.dispose(); base.geometry.dispose(); keyGeo.dispose();
   glintGeo.dispose(); haloFront.geometry.dispose(); haloBack.geometry.dispose();
   shadowMonitor.geometry.dispose(); shadowKeys.geometry.dispose();
