@@ -49,13 +49,18 @@ See `shared/keywords-research.md`. Summary for future copies:
 
 ## Testing
 
+Тестова інструментальня (Playwright/Backstop) — це **інструмент, а не runtime сайту**. Вона
+виконується на canonical Synology NAS checkout (Linux) або в CI, а не на робочій станції:
+залежності відтворюються з `testing/package-lock.json` (`npm ci` у `testing/`), тому
+версія `node_modules` не зберігається в git.
+
 ```bash
-# Visual regression (pixel-perfect)
+# Visual regression (pixel-perfect) - run on the NAS checkout or in CI
 cd testing
-npm install
+npm ci
 npx backstop test
 
-# Responsive overflow sweep (requires: python3 -m http.server 8080 from versions/)
+# Responsive overflow sweep (needs the served preview URL, see Production preview below)
 node quick-test.js
 
 # Full responsive audit (opens local files directly)
@@ -67,12 +72,19 @@ node layout-gutter.js
 
 ## Dev preview
 
-Serve `versions/` and open the landing (the importmap resolves `three` from CDN):
+Canonical preview surface is the stable NAS route, not a localhost server:
 
-```bash
-cd versions && python3 -m http.server 8080
-# → http://localhost:8080/en-US-landing/
+```text
+http://nlmhelp.keenetic.link:18080/en-US-landing/
 ```
+
+Контейнер `nexxgsm-landing` (nginx, bind-mount `versions/en-US-landing` →
+`/usr/share/nginx/html:ro`) віддає опублікований artifact. Нормальний шлях перегляду
+змін: відредагувати canonical source на NAS → опублікувати в `versions/en-US-landing` →
+перевірити стабільний URL вище. Локальний `python3 -m http.server` із `localhost`
+не є підтримуваним preview і не є доказом приймання; він допустимий лише як
+одноразовий пісочний запуск, коли NAS недоступний, і тоді статус роботи -
+`BLOCKED` з точним шаром відмови, а не підміна стабільного preview.
 
 ## Production
 
