@@ -128,8 +128,25 @@ Firefox, reduced-motion і без JavaScript.
 - Канон продубльовано в CF-репо: корінь (`index.html` + `assets/`) і `locales/en-US/`. **Джерело істини лишається в `nexxgsm-design/versions/en-US-landing/`** — змінювати там і копіювати сюди, поки не ухвалено рішення про автосинхронізацію.
 - Виправлено зламаний скаффолд: `wrangler.toml` був Workers-конфігом (ломав `wrangler pages deploy`), корінь не мав `index.html` (апекс віддав би 404), middleware перезаписував шляхи на неіснуючі файли; зібрані `wrangler-pages.toml`/`cloudflare-pages.toml` видалено.
 - Деплой: GitHub Action `.github/workflows/deploy.yml` (push у `main`). Домени прикріплені і працюють (2026-09-09): **apex `biosunlocktool.com` = основний прод**, www — те саме; SSL Full (strict). Секрети `CF_ACCOUNT_ID`/`CF_API_TOKEN` задані в GitHub.
-- **Пріоритет поверхів (рішення користувача 2026-09-09):** прод = biosunlocktool.com; NAS-деплой (18080) = **тестовий поверх перед кожним релізом**. Порядок релізу: зміна → перевірка на NAS → синк канону в CF-репо (корінь + `locales/en-US/`, byte-identity) → push → зелений Action → перевірка апекса. Не розкочувати в прод неперевірене.
+- **Пріоритет поверхів (рішення користувача 2026-09-09):** прод = biosunlocktool.com; NAS-деплой (18080) = **тестовий поверх перед кожним релізом**. Порядок релізу: зміна → перевірка на NAS → синк канону в CF-репо (корінь + `locales/en-US/`, byte-identity) → preflight → push → зелений Action → перевірка апекса. Не розкочувати в прод неперевірене; якщо Action падає через CI secret, реліз не вважається зеленим.
 - `canonical` і `og:url` у каноні прошиті на `https://biosunlocktool.com/`; перед production sync перевіряти, що вони не повернулися до staging URL.
+
+### Операційний статус (перевірено 2026-09-11)
+
+- У CF-репозиторії додано host-aware clean-root redirect: точні legacy paths
+  `/locales/pl-PL/`, `/locales/de-DE/` і `/locales/af-ZA/` повертають `301` на
+  відповідні субдомени; внутрішній `ASSETS.fetch` з trailing slash зберігається.
+- India production root починається англійською та має явний Hindi toggle;
+  legacy `en-IN` сторінка не маршрутизується.
+- Shared stylesheet у production-копіях має cache stamp `20260910y`, India
+  language script — `20260910k`; canonical workspace ще має `20260910x` без
+  India language script. Це відкрита sync-різниця, яку треба вирішити перед
+  наступним canonical → CF release; smoke-документація для production не повинна
+  посилатися на старі `20260910u`/`20260910x`.
+- Останні GitHub Actions доходять до Cloudflare Pages API, але падають з
+  `Authentication error [code: 10000]`. Локальний Wrangler OAuth і прямий Pages
+  deploy працюють; це тимчасовий fallback, а не заміна оновленого
+  `CF_API_TOKEN` secret.
 
 ### Відкриті питання (блокують лише SEO-прошивку, не деплой)
 
@@ -149,14 +166,14 @@ Firefox, reduced-motion і без JavaScript.
 ### Що вирішили
 
 - Лендінг обслуговує контейнер `nexxgsm-landing` (`nginx:1.27-alpine`, `--restart unless-stopped`) на NAS, порт **18080**.
-- Контейнер **bind-mount-ить** папку `/volume1/homes/vaoferi/Work/8fc8/nexxgsm-design/versions/en-US-landing/` (read-only) як web-root. Ця ж папка змонтована на робочій станції як `/Volumes/Work/8fc8`. **Зміна файлу = деплой**, без rebuild і копіювання.
+- Контейнер **bind-mount-ить** папку `/volume1/homes/vaoferi/Work/8fc8/nexxgsm-design/versions/en-US-landing/` (read-only) як web-root. На macOS вона доступна через `/Volumes/Work/8fc8`, на Windows — через mapped `W:\8fc8\nexxgsm-design\versions\en-US-landing` (UNC equivalent: `\\NAS\homes\vaoferi\Work\8fc8\nexxgsm-design\versions\en-US-landing`). **Зміна файлу = деплой**, без rebuild і копіювання.
 - Публікація: порт-форвардинг на зовнішньому Keenetic через RCI `ip static` (`GigabitEthernet1 tcp 18080 → MAC 90:09:d0:06:1c:92`, comment `nexxgsm-landing`), конфіг збережено.
 - Публічний URL: **http://nlmhelp.keenetic.link:18080/**
 - DNS wildcard для `*.nlmhelp.keenetic.link` уже покриває короткі staging-host-и `us`, `ca`, `in`, `de`, `pl`, `af`; нові port-forward правила не потрібні, бо всі вони використовують існуючий `18080`.
 
 ### Чому так
 
-- Bind-mount дає нульовий цикл деплою: зберіг файл у `/Volumes/Work/8fc8/...` — публічний сайт уже оновився. Для статичного лендінгу rebuild не потрібен.
+- Bind-mount дає нульовий цикл деплою: зберіг файл у canonical folder (macOS `/Volumes/Work/8fc8/...` або Windows `W:\8fc8\...`) — публічний staging уже оновився. Для статичного лендінгу rebuild не потрібен.
 - Порт 18080 вільний на NAS і в публічному просторі (перевірено свіпом); існуюча конвенція «180xx = публічні сайти» (miami-vero 18091, panenko 18090) збережена.
 - NAS доступний напряму SSH (`vaoferi@176.97.56.70 -p 2222`, ключ ed25519); docker на Synology вимагає `sudo` (пароль = DSM-пароль vaoferi).
 
@@ -171,7 +188,7 @@ Firefox, reduced-motion і без JavaScript.
 
 - `nexxgsm-design/README.md` — розділ «Production (remote NAS)», інструкція відтворення.
 - Контейнер `nexxgsm-landing` на NAS; правило `ip static` 18080 на зовнішньому Keenetic (index `ca82df028405342ed0d67ab7e04a75bb`).
-- Джерело контенту: `/volume1/homes/vaoferi/Work/8fc8/nexxgsm-design/versions/en-US-landing/` = `/Volumes/Work/8fc8/nexxgsm-design/versions/en-US-landing/`.
+- Джерело контенту: NAS `/volume1/homes/vaoferi/Work/8fc8/nexxgsm-design/versions/en-US-landing/`; macOS mount `/Volumes/Work/8fc8/nexxgsm-design/versions/en-US-landing/`; Windows mapped path `W:\8fc8\nexxgsm-design\versions\en-US-landing`.
 - Host-aware CSS читає `window.location.hostname`: `in.nlmhelp.keenetic.link:18080` отримує India-атмосферу, `pl.nlmhelp.keenetic.link:18080` — Poland-атмосферу, `de.nlmhelp.keenetic.link:18080` — Germany-атмосферу, `af.nlmhelp.keenetic.link:18080` — Africa-експеримент, а root/інші market-host-и залишаються US baseline до окремого design pass. Staging не маршрутизує мовні папки; повні Polish/German/Africa UI живуть у CF-маршрутах `/locales/pl-PL/`, `/locales/de-DE/` і `/locales/af-ZA/`, а production Functions тримають ці папки внутрішніми.
 
 ### Відкриті питання (не блокують)

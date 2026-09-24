@@ -24,4 +24,4 @@
 
 ## Критерій перевірки
 
-На staging і production перевіряються clean root URL, `lang="en-ZA"`, `data-market="africa"`, ochre `--accent`, CSS stamp `20260910x`, відсутність horizontal overflow, читабельність скла та робочі якорі. Якщо реакція ринку буде слабкою, тему можна прибрати одним CSS override без зміни структури сторінки.
+На staging і production перевіряються clean root URL, `lang="en-ZA"`, `data-market="africa"`, ochre `--accent`, CSS stamp `20260910y`, legacy `/locales/af-ZA/` → clean-root redirect, відсутність horizontal overflow, читабельність скла та робочі якорі. Якщо реакція ринку буде слабкою, тему можна прибрати одним CSS override без зміни структури сторінки.

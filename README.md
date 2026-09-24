@@ -76,9 +76,9 @@ cd versions && python3 -m http.server 8080
 
 ## Production
 
-**Live since 2026-09-09:** production runs on **Cloudflare Pages** at **https://biosunlocktool.com/** (www included) — monorepo `vaoferi/biosunlocktool`. Market hosts use short codes: `us`/`ca`/`in` serve the canonical English landing (`in` adds the India atmosphere), while `de`/`pl`/`af` map to their locale folders; `pl` serves the Polish graphite/carmine experiment, `de` the German steel/amber experiment, and `af` the Africa English indigo/terracotta experiment.
+**Live since 2026-09-09:** production runs on **Cloudflare Pages** at **https://biosunlocktool.com/** (www included) — monorepo `vaoferi/biosunlocktool`. Market hosts use short codes: `us`/`ca`/`in` serve the canonical English landing (`in` adds the India atmosphere and explicit Hindi toggle), while `de`/`pl`/`af` map to their locale folders; `pl` serves the Polish graphite/carmine experiment, `de` the German steel/amber experiment, and `af` the Africa English indigo/terracotta experiment.
 
-**Surface priority (user decision 2026-09-09):** test everything on the NAS staging surface first; only verified changes get deployed to production (sync canonical → push → green Action).
+**Surface priority (user decision 2026-09-09):** test everything on the NAS staging surface first; only verified changes get deployed to production (sync canonical → preflight → push → green Action → production smoke). На 2026-09-11 останній GitHub Action заблокований Cloudflare API error `10000` через `CF_API_TOKEN`; локальний Wrangler deploy працює, але це не замінює виправлення CI secret.
 
 Full rationale: `docs/architecture-decisions.md`.
 
@@ -92,9 +92,10 @@ The staging DNS is wildcarded, so the same port is available with the same short
 `http://us.nlmhelp.keenetic.link:18080/`, `http://ca.nlmhelp.keenetic.link:18080/`,
 `http://in.nlmhelp.keenetic.link:18080/`, `http://de.nlmhelp.keenetic.link:18080/`,
 `http://pl.nlmhelp.keenetic.link:18080/`, and `http://af.nlmhelp.keenetic.link:18080/`.
-The staging landing reads the hostname client-side; `in` gets the India theme, `pl` gets the Poland atmosphere, `de` gets the Germany atmosphere, and `af` gets the Africa experiment. The staging bind-mount still serves the canonical English copy; localized Polish/German/Africa copies are routed by Cloudflare Pages to `/locales/pl-PL/`, `/locales/de-DE/`, and `/locales/af-ZA/`.
+The staging landing reads the hostname client-side; `in` gets the India theme and explicit Hindi toggle, `pl` gets the Poland atmosphere, `de` gets the Germany atmosphere, and `af` gets the Africa experiment. The staging bind-mount still serves the canonical English copy; localized Polish/German/Africa copies are routed by Cloudflare Pages to `/locales/pl-PL/`, `/locales/de-DE/`, and `/locales/af-ZA/`.
 
-- **Content source of truth:** the NAS folder `/volume1/homes/vaoferi/Work/8fc8/nexxgsm-design/versions/en-US-landing/` — the same folder mounted on this workstation as `/Volumes/Work/8fc8`. Editing files here deploys to staging instantly (nginx bind-mounts the folder read-only, no rebuild or copy step). Use this surface to verify every change **before** releasing to production — it is not a backup to tear down, it is the pre-release test bench.
+- **Content source of truth:** the NAS folder `/volume1/homes/vaoferi/Work/8fc8/nexxgsm-design/versions/en-US-landing/` — on macOS it is mounted under `/Volumes/Work/8fc8`, while on Windows use the mapped drive `W:\8fc8\nexxgsm-design\versions\en-US-landing` (UNC equivalent: `\\NAS\homes\vaoferi\Work\8fc8\nexxgsm-design\versions\en-US-landing`). Editing files here deploys to staging instantly (nginx bind-mounts the folder read-only, no rebuild or copy step). Use this surface to verify every change **before** releasing to production — it is not a backup to tear down, it is the pre-release test bench.
+- **Sync status (2026-09-11):** the Cloudflare copies currently use `main.css?v=20260910y` and `india-language.js?v=20260910k`, while this canonical tree still uses `main.css?v=20260910x` and has no India language script. Treat that as a release blocker to resolve deliberately before the next canonical → CF sync; do not overwrite either surface blindly.
 - **Container:** `nexxgsm-landing` (`docker run -d --name nexxgsm-landing --restart unless-stopped -p 18080:80 -v <folder>:/usr/share/nginx/html:ro nginx:1.27-alpine`), managed via SSH (`vaoferi@176.97.56.70 -p 2222`, docker needs `sudo` on Synology).
 - **Router forward:** outer Keenetic RCI `ip static`: `GigabitEthernet1 tcp 18080 → MAC 90:09:d0:06:1c:92` (NAS), comment `nexxgsm-landing`; config saved (`system configuration save`). Public IP `176.97.56.70` via DDNS name `nlmhelp.keenetic.link`.
 - **Port convention:** `180xx` = public static sites on this NAS. Taken: 18080 (this site), 18085, 18090, 18091. **Do not reuse; pick the next free 180xx** for future language copies.
