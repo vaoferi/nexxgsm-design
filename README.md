@@ -75,8 +75,13 @@ node layout-gutter.js
 Canonical preview surface is the stable NAS route, not a localhost server:
 
 ```text
-http://nlmhelp.keenetic.link:18080/en-US-landing/
+http://nlmhelp.keenetic.link:18080/
 ```
+
+Контейнер `nexxgsm-landing` монтує `versions/en-US-landing` як **document root**, тому
+шлях усередині preview не має префікса `/en-US-landing/`: корінь дає сам лендінг, а
+ресурси лежать на `/assets/...`. (Перевірено 2026-09-24: `/` → 200,
+`/en-US-landing/` → 404.)
 
 Контейнер `nexxgsm-landing` (nginx, bind-mount `versions/en-US-landing` →
 `/usr/share/nginx/html:ro`) віддає опублікований artifact. Нормальний шлях перегляду
