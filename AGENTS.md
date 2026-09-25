@@ -78,7 +78,7 @@
 - New/unsynced repo або missing context → `vaoferi-bootstrap`; legacy/nested/conflicting docs → `vaoferi-project-adaptation`.
 - UI/layout/responsive/components/tokens/typography/design docs → `vaoferi-design-skill`.
 - Dependencies/versions/upgrades → `vaoferi-dependencies`; secrets/auth/privacy → `vaoferi-security`; non-trivial implementation/bug/refactor/tests → `vaoferi-engineering`.
-- Task tracking/Trello migration → `vaoferi-task-tracking`; production deploy/release/rollback/origin validation → `vaoferi-deploy`.
+- Task tracking/Trello migration → `vaoferi-task-tracking`; production deploy/release/rollback/origin validation → `vaoferi-deploy` (deploy fixes only DEPLOY-LAYER defects; product/UI/CI causes go to their owning task).
 - Не завантажуй specialized rules без потреби: core короткий, conditional knowledge routed.
 
 ## Task Tracking

@@ -17,10 +17,46 @@ Deploy assumes **implementation cards are already complete** under `vaoferi-task
 
 Classify any newly observed failure before changing product code:
 
-- release/candidate regression or true hard safety blocker → remains in release scope;
+- release/candidate regression or true hard safety blocker → remains in release scope, and the fix itself must still fall inside the **DEPLOY-LAYER** list below;
 - **PRE-EXISTING / UNRELATED** → create/link follow-up and continue unless it truly blocks safe publication;
 - **CI / ENVIRONMENT** → fix the harness/infrastructure in its own scope; do not tune product behavior to satisfy a broken environment without proof;
 - **EXTERNAL** → isolate/fail fast according to the project contract; do not rewrite the product blindly.
+
+### DEPLOY-LAYER — the only defect classes a deploy task may fix
+
+Only these, and only as the smallest-possible fix that is committed and pushed before publication continues:
+
+- deploy adapter / command / config schema;
+- candidate packaging and entrypoint identity;
+- transport/target mapping;
+- rollback/preimage mechanism;
+- publication/origin verifier;
+- an accidental release-stream commit or revert, when the intended candidate cannot otherwise be published.
+
+A DEPLOY-LAYER fix must not turn the deploy into an implementation campaign: no refactor, no backlog
+sweep, no "while we are here" product change.
+
+### Outside deploy ownership — even when it blocks the release
+
+- product/UI/business logic;
+- media quality/performance;
+- responsive/layout/typography;
+- browser test harness;
+- CI/environment/browser-installation debt.
+
+For that layer the release agent may diagnose and must create or link the owning Linear follow-up task,
+then: non-hard blocker → continue the release; true hard blocker → fail fast with one factual blocker;
+never repair that layer here without an explicit owner scope change.
+
+### Testing boundary for an already accepted candidate
+
+Deploy does not re-run the broad pre-deploy regression or the full browser matrix: the implementation/CI task owns those checks before the pushed handoff. Deploy owns release-specific identity, target and
+rollback checks, exact publication verification and the post-deploy smoke. The post-deploy smoke stays
+mandatory on the effective origin — it confirms the published artifact and never substitutes for the
+suite above.
+
+A non-release issue found during deploy automatically becomes its own Linear follow-up task with evidence;
+it does not inflate the release issue, and while safe publication remains possible the release continues.
 
 For an already-green frozen candidate, routine production publication should normally finish in roughly **5–10 хвилин**. If that is impossible, fail fast in that window with one factual hard blocker and the exact required next action; do not silently expand the release into hours of backlog repair.
 
@@ -192,6 +228,11 @@ After origin identity matches the candidate, test the actual production surface 
 - visual quality or accessibility gates owned by the task.
 
 A command-line health check can support this evidence; it does not replace required browser behavior.
+
+For an already accepted candidate this section is the short post-deploy smoke on the effective origin, not a
+re-run of the implementation/CI browser matrix. A failure here is classified by the lists in **Release scope
+boundary** before anything is edited: a DEPLOY-LAYER cause gets the smallest-possible fix, a product/UI cause
+becomes a follow-up for its owning task.
 
 ## Attempt frontier
 

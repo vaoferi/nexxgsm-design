@@ -95,7 +95,7 @@ DISCOVERY / INTAKE handoff:
 - `IMPLEMENTATION ISSUE: <id>` або `none`
 - `SHIPPABLE CODE: NO`
 
-RELEASE / DEPLOY використовує `vaoferi-deploy` і не має автоматично ремонтувати PRE-EXISTING / UNRELATED debt.
+RELEASE / DEPLOY використовує `vaoferi-deploy` і не має автоматично ремонтувати PRE-EXISTING / UNRELATED debt. Механічно: deploy-задача править лише **DEPLOY-LAYER** дефекти (adapter/command/schema, packaging та entrypoint identity, transport/target mapping, rollback/preimage, publication/origin verifier, випадковий commit/revert у release-гілці) і лише як smallest-possible fix, committed and pushed. Product/UI/business logic, media якість, responsive/layout/typography, browser test harness і CI/environment/browser-installation debt лишаються у власної задачі — через follow-up, а не через правку в RELEASE без explicit owner scope change.
 
 ## Trello → Linear Procedure
 
